@@ -30,7 +30,9 @@ class BraketSampler(Sampler, Structured):
     @property
     def properties(self) -> Dict[str, Any]:
         """
-        dict: Solver properties in D-Wave response format
+        dict: Solver properties in Braket boto3 response format
+
+        TODO: link boto3 docs
 
         Solver properties are dependent on the selected solver and subject to change;
         for example, new released features may add properties.
@@ -41,8 +43,11 @@ class BraketSampler(Sampler, Structured):
     def parameters(self) -> Dict[str, List]:
         """
         Dict[str, List]: Solver parameters in the form of a dict, where keys are
-        keyword parameters in D-Wave format and values are lists of properties in
+        keyword parameters in Braket format and values are lists of properties in
         :attr:`.BraketSampler.properties` for each key.
+
+        TODO: link boto3 docs
+
         Solver parameters are dependent on the selected solver and subject to change;
         for example, new released features may add parameters.
         """
