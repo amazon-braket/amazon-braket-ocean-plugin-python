@@ -36,7 +36,7 @@ make html
 To view the generated documentation, open the following file in a browser:
 `BRAKET_OCEAN_PLUGIN_ROOT/build/documentation/html/index.html`
 
-## Install the SDK for Testing
+## Install Additional Packages for Testing
 Make sure to install test dependencies first:
 ```bash
 pip install -e "braket-ocean-python-plugin[test]"
