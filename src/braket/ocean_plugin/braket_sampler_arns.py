@@ -11,6 +11,8 @@
 # ANY KIND, either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
 
-from braket.ocean_plugin.braket_sampler import BraketSampler  # noqa: F401
-from braket.ocean_plugin.braket_sampler_arns import BraketSamplerArns  # noqa: F401
-from braket.ocean_plugin.braket_sampler_parameters import BraketSamplerParameters  # noqa: F401
+from enum import Enum
+
+
+class BraketSamplerArns(str, Enum):
+    DWAVE = "arn:aws:aqx:::qpu:d-wave"

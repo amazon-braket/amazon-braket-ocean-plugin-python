@@ -1,8 +1,7 @@
 [run]
 parallel = True
 branch = True
-source =
-    braket
+source = braket.ocean_plugin
 
 [paths]
 source =
