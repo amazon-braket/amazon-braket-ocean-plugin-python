@@ -109,7 +109,7 @@ class BraketSampler(Sampler, Structured):
                 :class:`dimod.SampleSet`: A `dimod` :obj:`~dimod.SampleSet` object.
             Examples:
                 This example submits a two-variable QUBO mapped directly to qubits
-                0 and 4 on a D-Wave system.
+                0 and 4 on a sampler.
                 >>> from braket.ocean_plugin import BraketSampler
                 >>> sampler = BraketSampler()
                 >>> Q = {(0, 0): -1, (4, 4): -1, (0, 4): 2}
