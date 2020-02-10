@@ -130,8 +130,13 @@ def s3_destination_folder():
 
 
 @pytest.fixture
-def backend_parameters():
-    return {"dWaveParameters": {"postprocessingType": "SAMPLING"}}
+def dwave_parameters():
+    return {"postprocessingType": "SAMPLING"}
+
+
+@pytest.fixture
+def backend_parameters(dwave_parameters):
+    return {"dWaveParameters": dwave_parameters}
 
 
 @pytest.fixture
@@ -190,13 +195,14 @@ def test_sample_ising_dict_success(
     info,
     s3_destination_folder,
     backend_parameters,
+    dwave_parameters,
 ):
     task = Mock()
     braket_sampler.solver.run.return_value = task
     future = Mock()
     task.async_result.return_value = future
     future.result.return_value = AnnealingQuantumTaskResult.from_string(s3_ising_result)
-    actual = braket_sampler.sample_ising(linear, quadratic, backend_parameters=backend_parameters)
+    actual = braket_sampler.sample_ising(linear, quadratic, **dwave_parameters)
     call_list = braket_sampler.solver.run.call_args_list
     args, kwargs = call_list[0]
     problem = args[0]
@@ -221,7 +227,12 @@ def test_sample_qubo_bqm_structure_error(braket_sampler):
 
 
 def test_sample_qubo_dict_success(
-    braket_sampler, s3_qubo_result, info, s3_destination_folder, backend_parameters
+    braket_sampler,
+    s3_qubo_result,
+    info,
+    s3_destination_folder,
+    backend_parameters,
+    dwave_parameters,
 ):
     task = Mock()
     braket_sampler.solver.run.return_value = task
@@ -229,7 +240,7 @@ def test_sample_qubo_dict_success(
     task.async_result.return_value = future
     future.result.return_value = AnnealingQuantumTaskResult.from_string(s3_qubo_result)
     Q = {(0, 0): 0, (1, 2): 1, (0, 2): 0}
-    actual = braket_sampler.sample_qubo(Q, backend_parameters=backend_parameters)
+    actual = braket_sampler.sample_qubo(Q, **dwave_parameters)
     call_list = braket_sampler.solver.run.call_args_list
     args, kwargs = call_list[0]
     problem = args[0]

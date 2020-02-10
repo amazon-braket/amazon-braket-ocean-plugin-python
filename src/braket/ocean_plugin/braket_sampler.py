@@ -148,13 +148,14 @@ class BraketSampler(Sampler, Structured):
 
                 >>> from braket.ocean_plugin import BraketSampler
                 >>> sampler = BraketSampler(s3_destination_folder)
-                >>> params = {"dWaveParameters": {"postprocessingType": "SAMPLING"}}
-                >>> sampleset = sampler.sample_ising({0: -1, 1: 1}, {}, backend_parameters=params)
+                >>> sampleset = sampler.sample_ising({0: -1, 1: 1}, {}, resultFormat="HISTOGRAM")
                 >>> for sample in sampleset.samples():
                 ...    print(sample)
                 ...
                 {0: 1, 1: -1}
         """
+        solver_kwargs = self._construct_solver_kwargs(**kwargs)
+
         if isinstance(h, list):
             h = dict((v, b) for v, b in enumerate(h) if b or v in self.nodelist)
 
@@ -166,7 +167,7 @@ class BraketSampler(Sampler, Structured):
             raise BinaryQuadraticModelStructureError("Problem graph incompatible with solver.")
 
         future = self.solver.run(
-            Problem(ProblemType.ISING, h, J), self._s3_destination_folder, **kwargs
+            Problem(ProblemType.ISING, h, J), self._s3_destination_folder, **solver_kwargs
         ).async_result()
 
         variables = set(h).union(*J)
@@ -191,12 +192,14 @@ class BraketSampler(Sampler, Structured):
                 >>> from braket.ocean_plugin import BraketSampler
                 >>> sampler = BraketSampler(s3_destination_folder)
                 >>> Q = {(0, 0): -1, (4, 4): -1, (0, 4): 2}
-                >>> sampleset = sampler.sample_qubo(Q)
+                >>> sampleset = sampler.sample_qubo(Q, postprocessingType="SAMPLING")
                 >>> for sample in sampleset.samples():
                 ...    print(sample)
                 ...
                 {0: 1, 1: -1}
         """
+        solver_kwargs = self._construct_solver_kwargs(**kwargs)
+
         if not all(
             u in self.nodelist if u == v else ((u, v) in self.edgelist or (v, u) in self.edgelist)
             for u, v in Q
@@ -212,13 +215,21 @@ class BraketSampler(Sampler, Structured):
                 quadratic[(u, v)] = bias
 
         future = self.solver.run(
-            Problem(ProblemType.QUBO, linear, quadratic), self._s3_destination_folder, **kwargs
+            Problem(ProblemType.QUBO, linear, quadratic),
+            self._s3_destination_folder,
+            **solver_kwargs,
         ).async_result()
 
         variables = set().union(*Q)
 
         hook = BraketSampler._result_to_response_hook(variables, BINARY)
         return SampleSet.from_future(future, hook)
+
+    def _construct_solver_kwargs(self, **kwargs):
+        for parameter in kwargs:
+            if parameter not in self.parameters:
+                raise ValueError(f"Parameter {parameter} not supported")
+        return {"backend_parameters": {"dWaveParameters": kwargs}}
 
     @staticmethod
     def _result_to_response_hook(variables, vartype):
