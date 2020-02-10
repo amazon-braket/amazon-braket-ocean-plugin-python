@@ -48,10 +48,19 @@ class BraketSampler(Sampler, Structured):
         self._s3_destination_folder = s3_destination_folder
         self._device_arn = device_arn
         self.solver = AwsQpu(device_arn, aws_session)
-        self._properties = copy.deepcopy(self.solver.properties)
+        self._properties = self._create_properties()
         self._parameters = self._create_parameters()
         self._edgelist = self._create_edgelist()
         self._nodelist = self._create_nodelist()
+
+    def _create_properties(self) -> Dict[str, Any]:
+        """
+        Create properties dict
+
+        Returns:
+            dict: Solver properties in Braket boto3 response format
+        """
+        return copy.deepcopy(self.solver.properties)
 
     @property
     def properties(self) -> Dict[str, Any]:
@@ -139,9 +148,12 @@ class BraketSampler(Sampler, Structured):
                 J (dict[(int, int): float]):
                     Quadratic biases of the Ising model.
                 **kwargs:
-                    Optional keyword arguments for the sampling method
+                    Optional keyword arguments for the sampling method in Braket boto3 format
             Returns:
                 :class:`dimod.SampleSet`: A `dimod` :obj:`~dimod.SampleSet` object.
+            Raises:
+                BinaryQuadraticModelStructureError: If problem graph is incompatible with solver
+                ValueError: If keyword argument is unsupported by solver
             Examples:
                 This example submits a two-variable Ising problem mapped directly to qubits
                 0 and 1.
@@ -182,9 +194,12 @@ class BraketSampler(Sampler, Structured):
                 Q (dict):
                     Coefficients of a quadratic unconstrained binary optimization (QUBO) model.
                 **kwargs:
-                    Optional keyword arguments for the sampling method
+                    Optional keyword arguments for the sampling method in Braket boto3 format
             Returns:
                 :class:`dimod.SampleSet`: A `dimod` :obj:`~dimod.SampleSet` object.
+            Raises:
+                BinaryQuadraticModelStructureError: If problem graph is incompatible with solver
+                ValueError: If keyword argument is unsupported by solver
             Examples:
                 This example submits a two-variable QUBO mapped directly to qubits
                 0 and 4 on a sampler

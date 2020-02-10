@@ -186,6 +186,11 @@ def test_sample_ising_bqm_structure_error(braket_sampler):
     braket_sampler.sample_ising({0: -1, 500: 1}, {})
 
 
+@pytest.mark.xfail(raises=ValueError)
+def test_sample_ising_value_error(braket_sampler):
+    braket_sampler.sample_ising({}, {(0, 0): 1}, unsupported="hi")
+
+
 @pytest.mark.parametrize("linear, quadratic", [({0: -1, 1: 1, 2: -1}, {}), ([-1, 1, -1], {})])
 def test_sample_ising_dict_success(
     linear,
@@ -224,6 +229,11 @@ def test_sample_ising_dict_success(
 @pytest.mark.xfail(raises=BinaryQuadraticModelStructureError)
 def test_sample_qubo_bqm_structure_error(braket_sampler):
     braket_sampler.sample_qubo({(1, 500): 0})
+
+
+@pytest.mark.xfail(raises=ValueError)
+def test_sample_qubo_value_error(braket_sampler):
+    braket_sampler.sample_qubo({(0, 0): 0}, unsupported="hi")
 
 
 def test_sample_qubo_dict_success(
