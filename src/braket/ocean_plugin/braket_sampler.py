@@ -12,12 +12,14 @@
 # language governing permissions and limitations under the License.
 
 import copy
+from functools import lru_cache
 from typing import Any, Dict, List, Tuple, Union
 
 from braket.annealing.problem import Problem, ProblemType
 from braket.aws import AwsQpu, AwsSession
-from braket.ocean_plugin.braket_sampler_arns import BraketSamplerArns
-from braket.ocean_plugin.braket_sampler_parameters import BraketSamplerParameters
+from braket.ocean_plugin.braket_sampler_arns import BraketSamplerArns, get_arn_to_enum_name_mapping
+from braket.ocean_plugin.braket_solver_metadata import BraketSolverMetadata
+from braket.ocean_plugin.exceptions import InvalidSolverDeviceArn
 from braket.tasks import AnnealingQuantumTaskResult
 from dimod import BINARY, SPIN, Sampler, SampleSet, Structured
 from dimod.exceptions import BinaryQuadraticModelStructureError
@@ -30,39 +32,34 @@ class BraketSampler(Sampler, Structured):
     Args:
         s3_destination_folder (AwsSession.S3DestinationFolder): NamedTuple with bucket (index 0)
             and key (index 1) that is the results destination folder in S3.
-        device_arn (str): AWS quantum device arn. Default is D-Wave.
+        device_arn (str): AWS quantum device arn.
         aws_session (AwsSession): AwsSession to call AWS with.
 
+    Raises:
+        InvalidSolverDeviceArn: If provided device ARN for solver is unsupported.
+
     Examples:
-        >>> from braket.ocean_plugin import BraketSampler
+        >>> from braket.ocean_plugin import BraketSampler, BraketSamplerArns
         >>> s3_destination_folder = ('test_bucket', 'test_folder')
-        >>> sampler = BraketSampler(s3_destination_folder)
+        >>> sampler = BraketSampler(s3_destination_folder, BraketSamplerArns.DWAVE)
     """
 
     def __init__(
         self,
         s3_destination_folder: AwsSession.S3DestinationFolder,
-        device_arn: str = BraketSamplerArns.DWAVE,
+        device_arn: str,
         aws_session: AwsSession = None,
     ):
         self._s3_destination_folder = s3_destination_folder
+
+        if device_arn not in get_arn_to_enum_name_mapping():
+            raise InvalidSolverDeviceArn(f"Invalid device ARN {device_arn}")
         self._device_arn = device_arn
+
         self.solver = AwsQpu(device_arn, aws_session)
-        self._properties = self._create_properties()
-        self._parameters = self._create_parameters()
-        self._edgelist = self._create_edgelist()
-        self._nodelist = self._create_nodelist()
-
-    def _create_properties(self) -> Dict[str, Any]:
-        """
-        Create properties dict
-
-        Returns:
-            dict: Solver properties in Braket boto3 response format
-        """
-        return copy.deepcopy(self.solver.properties)
 
     @property
+    @lru_cache(maxsize=1)
     def properties(self) -> Dict[str, Any]:
         """
         dict: Solver properties in Braket boto3 response format
@@ -72,25 +69,10 @@ class BraketSampler(Sampler, Structured):
         Solver properties are dependent on the selected solver and subject to change;
         for example, new released features may add properties.
         """
-        return self._properties
-
-    def _create_parameters(self) -> Dict[str, Any]:
-        """
-        Create parameter dict
-
-        TODO: use AwsQpu when we have an API that returns parameters schema
-
-        Returns:
-            Dict[str, List]: Solver parameters in the form of a dict, where keys are
-            keyword parameters in Braket format and values are lists of properties in
-            :attr:`.BraketSampler.properties` for each key.
-        """
-        if self._device_arn == BraketSamplerArns.DWAVE:
-            return {param: ["parameters"] for param in BraketSamplerParameters.DWAVE}
-        else:
-            raise NotImplementedError
+        return copy.deepcopy(self.solver.properties)
 
     @property
+    @lru_cache(maxsize=1)
     def parameters(self) -> Dict[str, List]:
         """
         Dict[str, List]: Solver parameters in the form of a dict, where keys are
@@ -102,69 +84,59 @@ class BraketSampler(Sampler, Structured):
         Solver parameters are dependent on the selected solver and subject to change;
         for example, new released features may add parameters.
         """
-        return self._parameters
+        enum_name = get_arn_to_enum_name_mapping()[self._device_arn]
+        return {param: ["parameters"] for param in BraketSolverMetadata[enum_name]["parameters"]}
 
-    def _create_nodelist(self) -> List[int]:
-        """
-        Create nodelist
-
-        List[int]: List of active qubits for the solver.
-        """
+    @property
+    @lru_cache(maxsize=1)
+    def nodelist(self) -> List[int]:
+        """List[int]: List of active qubits for the solver."""
         return sorted(set(self.properties["qubits"]))
 
     @property
-    def nodelist(self) -> List[int]:
-        """List[int]: List of active qubits for the solver."""
-        return self._nodelist
-
-    def _create_edgelist(self) -> List[Tuple[int, int]]:
-        """
-        Create edgelist
-
-        List[Tuple[int, int]]: List of active couplers for the solver.
-        """
-        return sorted(set((u, v) if u < v else (v, u) for u, v in self.properties["couplers"]))
-
-    @property
+    @lru_cache(maxsize=1)
     def edgelist(self) -> List[Tuple[int, int]]:
         """List[Tuple[int, int]]: List of active couplers for the solver."""
-
-        return self._edgelist
+        return sorted(set((u, v) if u < v else (v, u) for u, v in self.properties["couplers"]))
 
     def sample_ising(
         self, h: Union[Dict[int, int], List[int]], J: Dict[int, int], **kwargs
     ) -> SampleSet:
         """
         Sample from the specified Ising model.
-            Args:
-                h (dict/list):
-                    Linear biases of the Ising model. If a dict, should be of the
-                    form `{v: bias, ...}` where `v` is a spin-valued variable and
-                    `bias` is its associated bias. If a list, it is treated as a
-                    list of biases where the indices are the variable labels,
-                    except in the case of missing qubits in which case 0 biases are
-                    ignored while a non-zero bias set on a missing qubit raises an
-                    error.
-                J (dict[(int, int): float]):
-                    Quadratic biases of the Ising model.
-                **kwargs:
-                    Optional keyword arguments for the sampling method in Braket boto3 format
-            Returns:
-                :class:`dimod.SampleSet`: A `dimod` :obj:`~dimod.SampleSet` object.
-            Raises:
-                BinaryQuadraticModelStructureError: If problem graph is incompatible with solver
-                ValueError: If keyword argument is unsupported by solver
-            Examples:
-                This example submits a two-variable Ising problem mapped directly to qubits
-                0 and 1.
 
-                >>> from braket.ocean_plugin import BraketSampler
-                >>> sampler = BraketSampler(s3_destination_folder)
-                >>> sampleset = sampler.sample_ising({0: -1, 1: 1}, {}, resultFormat="HISTOGRAM")
-                >>> for sample in sampleset.samples():
-                ...    print(sample)
-                ...
-                {0: 1, 1: -1}
+        Args:
+            h (dict/list):
+                Linear biases of the Ising model. If a dict, should be of the
+                form `{v: bias, ...}` where `v` is a spin-valued variable and
+                `bias` is its associated bias. If a list, it is treated as a
+                list of biases where the indices are the variable labels,
+                except in the case of missing qubits in which case 0 biases are
+                ignored while a non-zero bias set on a missing qubit raises an
+                error.
+            J (dict[(int, int): float]):
+                Quadratic biases of the Ising model.
+            **kwargs:
+                Optional keyword arguments for the sampling method in Braket boto3 format
+
+        Returns:
+            :class:`dimod.SampleSet`: A `dimod` :obj:`~dimod.SampleSet` object.
+
+        Raises:
+            BinaryQuadraticModelStructureError: If problem graph is incompatible with solver
+            ValueError: If keyword argument is unsupported by solver
+
+        Examples:
+            This example submits a two-variable Ising problem mapped directly to qubits
+            0 and 1.
+
+            >>> from braket.ocean_plugin import BraketSampler
+            >>> sampler = BraketSampler(s3_destination_folder, BraketSamplerArns.DWAVE)
+            >>> sampleset = sampler.sample_ising({0: -1, 1: 1}, {}, resultFormat="HISTOGRAM")
+            >>> for sample in sampleset.samples():
+            ...    print(sample)
+            ...
+            {0: 1, 1: -1}
         """
         solver_kwargs = self._construct_solver_kwargs(**kwargs)
 
@@ -190,28 +162,32 @@ class BraketSampler(Sampler, Structured):
     def sample_qubo(self, Q: Dict[Tuple[int, int], int], **kwargs) -> SampleSet:
         """
         Sample from the specified QUBO.
-            Args:
-                Q (dict):
-                    Coefficients of a quadratic unconstrained binary optimization (QUBO) model.
-                **kwargs:
-                    Optional keyword arguments for the sampling method in Braket boto3 format
-            Returns:
-                :class:`dimod.SampleSet`: A `dimod` :obj:`~dimod.SampleSet` object.
-            Raises:
-                BinaryQuadraticModelStructureError: If problem graph is incompatible with solver
-                ValueError: If keyword argument is unsupported by solver
-            Examples:
-                This example submits a two-variable QUBO mapped directly to qubits
-                0 and 4 on a sampler
 
-                >>> from braket.ocean_plugin import BraketSampler
-                >>> sampler = BraketSampler(s3_destination_folder)
-                >>> Q = {(0, 0): -1, (4, 4): -1, (0, 4): 2}
-                >>> sampleset = sampler.sample_qubo(Q, postprocessingType="SAMPLING")
-                >>> for sample in sampleset.samples():
-                ...    print(sample)
-                ...
-                {0: 1, 1: -1}
+        Args:
+            Q (dict):
+                Coefficients of a quadratic unconstrained binary optimization (QUBO) model.
+            **kwargs:
+                Optional keyword arguments for the sampling method in Braket boto3 format
+
+        Returns:
+            :class:`dimod.SampleSet`: A `dimod` :obj:`~dimod.SampleSet` object.
+
+        Raises:
+            BinaryQuadraticModelStructureError: If problem graph is incompatible with solver
+            ValueError: If keyword argument is unsupported by solver
+
+        Examples:
+            This example submits a two-variable QUBO mapped directly to qubits
+            0 and 4 on a sampler
+
+            >>> from braket.ocean_plugin import BraketSampler
+            >>> sampler = BraketSampler(s3_destination_folder, BraketSamplerArns.DWAVE)
+            >>> Q = {(0, 0): -1, (4, 4): -1, (0, 4): 2}
+            >>> sampleset = sampler.sample_qubo(Q, postprocessingType="SAMPLING")
+            >>> for sample in sampleset.samples():
+            ...    print(sample)
+            ...
+            {0: 1, 1: -1}
         """
         solver_kwargs = self._construct_solver_kwargs(**kwargs)
 
@@ -244,7 +220,9 @@ class BraketSampler(Sampler, Structured):
         for parameter in kwargs:
             if parameter not in self.parameters:
                 raise ValueError(f"Parameter {parameter} not supported")
-        return {"backend_parameters": {"dWaveParameters": kwargs}}
+        enum_name = get_arn_to_enum_name_mapping()[self._device_arn]
+        key_name = BraketSolverMetadata[enum_name]["backend_parameters_key_name"]
+        return {"backend_parameters": {key_name: kwargs}}
 
     @staticmethod
     def _result_to_response_hook(variables, vartype):

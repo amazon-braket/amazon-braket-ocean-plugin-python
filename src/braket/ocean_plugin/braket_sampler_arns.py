@@ -12,7 +12,15 @@
 # language governing permissions and limitations under the License.
 
 from enum import Enum
+from functools import lru_cache
+from typing import Dict
 
 
 class BraketSamplerArns(str, Enum):
     DWAVE = "arn:aws:aqx:::qpu:d-wave"
+
+
+@lru_cache(maxsize=1)
+def get_arn_to_enum_name_mapping() -> Dict[str, str]:
+    """Get the mapping of ARN to enum name"""
+    return {item.value: item.name for item in BraketSamplerArns}

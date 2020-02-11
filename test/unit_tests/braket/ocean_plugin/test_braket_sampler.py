@@ -3,7 +3,12 @@ from unittest.mock import Mock, patch
 
 import pytest
 from braket.annealing.problem import Problem, ProblemType
-from braket.ocean_plugin import BraketSampler, BraketSamplerArns, BraketSamplerParameters
+from braket.ocean_plugin import (
+    BraketSampler,
+    BraketSamplerArns,
+    BraketSolverMetadata,
+    InvalidSolverDeviceArn,
+)
 from braket.tasks import AnnealingQuantumTaskResult
 from dimod import BINARY, SPIN, SampleSet
 from dimod.exceptions import BinaryQuadraticModelStructureError
@@ -136,7 +141,7 @@ def dwave_parameters():
 
 @pytest.fixture
 def backend_parameters(dwave_parameters):
-    return {"dWaveParameters": dwave_parameters}
+    return {BraketSolverMetadata.DWAVE["backend_parameters_key_name"]: dwave_parameters}
 
 
 @pytest.fixture
@@ -157,13 +162,13 @@ def braket_sampler(mock_qpu, braket_sampler_properties, s3_destination_folder):
 
 
 def test_parameters(braket_sampler):
-    expected_params = {param: ["parameters"] for param in BraketSamplerParameters.DWAVE}
+    expected_params = {param: ["parameters"] for param in BraketSolverMetadata.DWAVE["parameters"]}
     assert braket_sampler.parameters == expected_params
 
 
-@pytest.mark.xfail(raises=NotImplementedError)
+@pytest.mark.xfail(raises=InvalidSolverDeviceArn)
 @patch("braket.ocean_plugin.braket_sampler.AwsQpu")
-def test_arn_not_implemented(mock_qpu, braket_sampler_properties, s3_destination_folder):
+def test_arn_invalid(mock_qpu, braket_sampler_properties, s3_destination_folder):
     mock_qpu.return_value.properties = braket_sampler_properties
     arn = "test_arn"
     BraketSampler(s3_destination_folder, arn, Mock())
