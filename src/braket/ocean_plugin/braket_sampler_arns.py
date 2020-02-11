@@ -11,7 +11,16 @@
 # ANY KIND, either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
 
-from braket.ocean_plugin.braket_sampler import BraketSampler  # noqa: F401
-from braket.ocean_plugin.braket_sampler_arns import BraketSamplerArns  # noqa: F401
-from braket.ocean_plugin.braket_solver_metadata import BraketSolverMetadata  # noqa: F401
-from braket.ocean_plugin.exceptions import InvalidSolverDeviceArn  # noqa: F401
+from enum import Enum
+from functools import lru_cache
+from typing import Dict
+
+
+class BraketSamplerArns(str, Enum):
+    DWAVE = "arn:aws:aqx:::qpu:d-wave"
+
+
+@lru_cache(maxsize=1)
+def get_arn_to_enum_name_mapping() -> Dict[str, str]:
+    """Get the mapping of ARN to enum name"""
+    return {item.value: item.name for item in BraketSamplerArns}

@@ -11,7 +11,5 @@
 # ANY KIND, either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
 
-from braket.ocean_plugin.braket_sampler import BraketSampler  # noqa: F401
-from braket.ocean_plugin.braket_sampler_arns import BraketSamplerArns  # noqa: F401
-from braket.ocean_plugin.braket_solver_metadata import BraketSolverMetadata  # noqa: F401
-from braket.ocean_plugin.exceptions import InvalidSolverDeviceArn  # noqa: F401
+class InvalidSolverDeviceArn(Exception):
+    """Raised when trying to use an invalid device ARN for the solver"""
