@@ -24,6 +24,7 @@ setup(
         "braket-sdk @ git+https://github.com/aws/braket-python-sdk.git",
         "dimod>=0.8.13",
         "boto3",
+        "boltons",
     ],
     extras_require={
         "test": [
