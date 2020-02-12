@@ -11,13 +11,16 @@
 # ANY KIND, either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
 
+from __future__ import annotations
+
 import copy
 from functools import lru_cache
 from typing import Any, Dict, List, Tuple, Union
 
+from boltons.dictutils import FrozenDict
 from braket.annealing.problem import Problem, ProblemType
 from braket.aws import AwsQpu, AwsSession
-from braket.ocean_plugin.braket_sampler_arns import BraketSamplerArns, get_arn_to_enum_name_mapping
+from braket.ocean_plugin.braket_sampler_arns import get_arn_to_enum_name_mapping
 from braket.ocean_plugin.braket_solver_metadata import BraketSolverMetadata
 from braket.ocean_plugin.exceptions import InvalidSolverDeviceArn
 from braket.tasks import AnnealingQuantumTaskResult
@@ -60,22 +63,22 @@ class BraketSampler(Sampler, Structured):
 
     @property
     @lru_cache(maxsize=1)
-    def properties(self) -> Dict[str, Any]:
+    def properties(self) -> FrozenDict[str, Any]:
         """
-        dict: Solver properties in Braket boto3 response format
+        FrozenDict[str, Any]: Solver properties in Braket boto3 response format
 
         TODO: link boto3 docs
 
         Solver properties are dependent on the selected solver and subject to change;
         for example, new released features may add properties.
         """
-        return copy.deepcopy(self.solver.properties)
+        return FrozenDict(copy.deepcopy(self.solver.properties))
 
     @property
     @lru_cache(maxsize=1)
-    def parameters(self) -> Dict[str, List]:
+    def parameters(self) -> FrozenDict[str, List]:
         """
-        Dict[str, List]: Solver parameters in the form of a dict, where keys are
+        FrozenDict[str, List]: Solver parameters in the form of a dict, where keys are
         keyword parameters in Braket format and values are lists of properties in
         :attr:`.BraketSampler.properties` for each key.
 
@@ -85,19 +88,23 @@ class BraketSampler(Sampler, Structured):
         for example, new released features may add parameters.
         """
         enum_name = get_arn_to_enum_name_mapping()[self._device_arn]
-        return {param: ["parameters"] for param in BraketSolverMetadata[enum_name]["parameters"]}
+        return FrozenDict(
+            {param: ["parameters"] for param in BraketSolverMetadata[enum_name]["parameters"]}
+        )
 
     @property
     @lru_cache(maxsize=1)
-    def nodelist(self) -> List[int]:
-        """List[int]: List of active qubits for the solver."""
-        return sorted(set(self.properties["qubits"]))
+    def nodelist(self) -> Tuple[int]:
+        """Tuple[int]: Tuple of active qubits for the solver."""
+        return tuple(sorted(set(self.properties["qubits"])))
 
     @property
     @lru_cache(maxsize=1)
-    def edgelist(self) -> List[Tuple[int, int]]:
-        """List[Tuple[int, int]]: List of active couplers for the solver."""
-        return sorted(set((u, v) if u < v else (v, u) for u, v in self.properties["couplers"]))
+    def edgelist(self) -> Tuple[Tuple[int, int]]:
+        """Tuple[Tuple[int, int]]: Tuple of active couplers for the solver."""
+        return tuple(
+            sorted(set((u, v) if u < v else (v, u) for u, v in self.properties["couplers"]))
+        )
 
     def sample_ising(
         self, h: Union[Dict[int, int], List[int]], J: Dict[int, int], **kwargs

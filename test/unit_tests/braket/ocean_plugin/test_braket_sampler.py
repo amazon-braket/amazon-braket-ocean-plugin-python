@@ -1,7 +1,21 @@
+# Copyright 2019-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"). You
+# may not use this file except in compliance with the License. A copy of
+# the License is located at
+#
+#     http://aws.amazon.com/apache2.0/
+#
+# or in the "license" file accompanying this file. This file is
+# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+# ANY KIND, either express or implied. See the License for the specific
+# language governing permissions and limitations under the License.
+
 import json
 from unittest.mock import Mock, patch
 
 import pytest
+from boltons.dictutils import FrozenDict
 from braket.annealing.problem import Problem, ProblemType
 from braket.ocean_plugin import (
     BraketSampler,
@@ -164,6 +178,7 @@ def braket_sampler(mock_qpu, braket_sampler_properties, s3_destination_folder):
 def test_parameters(braket_sampler):
     expected_params = {param: ["parameters"] for param in BraketSolverMetadata.DWAVE["parameters"]}
     assert braket_sampler.parameters == expected_params
+    assert isinstance(braket_sampler.properties, FrozenDict)
 
 
 @pytest.mark.xfail(raises=InvalidSolverDeviceArn)
@@ -175,15 +190,16 @@ def test_arn_invalid(mock_qpu, braket_sampler_properties, s3_destination_folder)
 
 
 def test_properties(braket_sampler, braket_sampler_properties):
+    assert isinstance(braket_sampler.properties, FrozenDict)
     assert braket_sampler.properties == braket_sampler_properties
 
 
 def test_edgelist(braket_sampler):
-    assert braket_sampler.edgelist == [(0, 2), (1, 2)]
+    assert braket_sampler.edgelist == ((0, 2), (1, 2))
 
 
 def test_nodelist(braket_sampler):
-    assert braket_sampler.nodelist == [0, 1, 2]
+    assert braket_sampler.nodelist == (0, 1, 2)
 
 
 @pytest.mark.xfail(raises=BinaryQuadraticModelStructureError)
