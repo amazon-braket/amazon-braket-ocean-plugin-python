@@ -89,7 +89,10 @@ class BraketSampler(Sampler, Structured):
         """
         enum_name = get_arn_to_enum_name_mapping()[self._device_arn]
         return FrozenDict(
-            {param: ["parameters"] for param in BraketSolverMetadata[enum_name]["parameters"]}
+            {
+                param: ["parameters"]
+                for param in BraketSolverMetadata[enum_name]["parameters"].values()
+            }
         )
 
     @property
@@ -145,7 +148,7 @@ class BraketSampler(Sampler, Structured):
             ...
             {0: 1, 1: -1}
         """
-        solver_kwargs = self._construct_solver_kwargs(**kwargs)
+        solver_kwargs = self._process_solver_kwargs(**kwargs)
 
         if isinstance(h, list):
             h = dict((v, b) for v, b in enumerate(h) if b or v in self.nodelist)
@@ -190,13 +193,13 @@ class BraketSampler(Sampler, Structured):
             >>> from braket.ocean_plugin import BraketSampler
             >>> sampler = BraketSampler(s3_destination_folder, BraketSamplerArns.DWAVE)
             >>> Q = {(0, 0): -1, (4, 4): -1, (0, 4): 2}
-            >>> sampleset = sampler.sample_qubo(Q, postprocessingType="SAMPLING")
+            >>> sampleset = sampler.sample_qubo(Q, postprocessingType="SAMPLING", shots=100)
             >>> for sample in sampleset.samples():
             ...    print(sample)
             ...
             {0: 1, 1: -1}
         """
-        solver_kwargs = self._construct_solver_kwargs(**kwargs)
+        solver_kwargs = self._process_solver_kwargs(**kwargs)
 
         if not all(
             u in self.nodelist if u == v else ((u, v) in self.edgelist or (v, u) in self.edgelist)
@@ -223,13 +226,48 @@ class BraketSampler(Sampler, Structured):
         hook = BraketSampler._result_to_response_hook(variables, BINARY)
         return SampleSet.from_future(future, hook)
 
-    def _construct_solver_kwargs(self, **kwargs):
+    def _process_solver_kwargs(self, **kwargs) -> Dict[str, Any]:
+        """
+        Process kwargs to be compatible as kwargs for the solver.
+
+        Args:
+            **kwargs: Optional keyword arguments for sampling method
+        Return:
+            Dict[str, Any]: a dict of kwargs to the solver
+        """
+        self._check_kwargs_solver(**kwargs)
+        return self._create_solver_kwargs(**kwargs)
+
+    def _check_kwargs_solver(self, **kwargs):
+        """
+        Check if kwargs are supported by solver
+
+        Args:
+            **kwargs: Optional keyword arguments for sampling method
+        Raises:
+            ValueError: If key word argument is unsupported by solver
+        """
         for parameter in kwargs:
             if parameter not in self.parameters:
                 raise ValueError(f"Parameter {parameter} not supported")
+
+    def _create_solver_kwargs(self, **kwargs):
+        """
+        Transform **kwargs to create a dict of kwargs to the solver.
+
+        Args:
+            **kwargs: Optional keyword arguments for sampling method
+        Return:
+            Dict[str, Any]: a dict of kwargs to the solver
+        """
         enum_name = get_arn_to_enum_name_mapping()[self._device_arn]
         key_name = BraketSolverMetadata[enum_name]["backend_parameters_key_name"]
-        return {"backend_parameters": {key_name: kwargs}}
+        solver_kwargs = {"backend_parameters": {key_name: kwargs}}
+        if "shots" in kwargs:
+            shots = kwargs["shots"]
+            del kwargs["shots"]
+            solver_kwargs.update({"shots": shots})
+        return solver_kwargs
 
     @staticmethod
     def _result_to_response_hook(variables, vartype):

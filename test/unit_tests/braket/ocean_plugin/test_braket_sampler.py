@@ -11,159 +11,36 @@
 # ANY KIND, either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
 
-import json
+import copy
 from unittest.mock import Mock, patch
 
 import pytest
 from boltons.dictutils import FrozenDict
-from braket.annealing.problem import Problem, ProblemType
 from braket.ocean_plugin import (
     BraketSampler,
     BraketSamplerArns,
     BraketSolverMetadata,
     InvalidSolverDeviceArn,
 )
-from braket.tasks import AnnealingQuantumTaskResult
-from dimod import BINARY, SPIN, SampleSet
+from conftest import sample_ising_common_testing, sample_qubo_common_testing
 from dimod.exceptions import BinaryQuadraticModelStructureError
 
 
 @pytest.fixture
-def braket_sampler_properties():
-    return {
-        "activeQubitCount": 2,
-        "annealingOffsetStep": 2.0,
-        "annealingOffsetStepPhi0": 4.0,
-        "annealingOffsetRanges": [[1.34, 5.23], [3.24, 1.44]],
-        "annealingDurationRange": [3, 5],
-        "couplers": [[1, 2], [0, 2]],
-        "defaultAnnealingDuration": 4,
-        "defaultProgrammingThermalizationDuration": 2,
-        "defaultReadoutThermalizationDuration": 1,
-        "extendedJRange": [3.0, 4.0],
-        "hGainScheduleRange": [2.0, 3.0],
-        "hRange": [3.4, 5.6],
-        "jRange": [1.0, 2.0],
-        "maximumAnnealingSchedulePoints": 3,
-        "maximumHGainSchedulePoints": 2,
-        "qubitCount": 3,
-        "qubits": [1, 0, 2],
-        "perQubitCouplingRange": [1.0, 3.0],
-        "programmingThermalizationDurationRange": [1, 2],
-        "quotaConversionRate": 2.5,
-        "readoutThermalizationDurationRange": [4, 6],
-        "shotsRange": [3, 5],
-        "taskRunDurationRange": [3, 6],
-        "topology": {"type": "chimera", "topology": [1, 1, 1]},
-    }
-
-
-@pytest.fixture()
-def additional_metadata():
-    return {
-        "DWaveMetadata": {
-            "ActiveVariables": [0],
-            "Timing": {
-                "QpuSamplingTime": 1575,
-                "QpuAnnealTimePerSample": 20,
-                "QpuReadoutTimePerSample": 274,
-                "QpuAccessTime": 10917,
-                "QpuAccessOverheadTime": 3382,
-                "QpuProgrammingTime": 9342,
-                "QpuDelayTimePerSample": 21,
-                "TotalPostProcessingTime": 117,
-                "PostProcessingOverheadTime": 117,
-                "TotalRealTime": 10917,
-                "RunTimeChip": 1575,
-                "AnnealTimePerRun": 20,
-                "ReadoutTimePerRun": 274,
-            },
-        }
-    }
-
-
-@pytest.fixture
-def task_metadata():
-    return {
-        "TaskMetadata": {
-            "Id": "UUID_blah_1",
-            "Status": "COMPLETED",
-            "BackendArn": BraketSamplerArns.DWAVE,
-            "Shots": 5,
-        }
-    }
-
-
-@pytest.fixture
-def result(additional_metadata, task_metadata):
-    result = {
-        "Solutions": [[-1, -1, -1], [1, -1, 1], [1, -1, -1]],
-        "VariableCount": 2,
-        "Values": [0.0, 1.0, 2.0],
-        "SolutionCounts": None,
-        "DWaveMetadata": {
-            "ActiveVariables": [0],
-            "Timing": {
-                "QpuSamplingTime": 1575,
-                "QpuAnnealTimePerSample": 20,
-                "QpuReadoutTimePerSample": 274,
-                "QpuAccessTime": 10917,
-                "QpuAccessOverheadTime": 3382,
-                "QpuProgrammingTime": 9342,
-                "QpuDelayTimePerSample": 21,
-                "TotalPostProcessingTime": 117,
-                "PostProcessingOverheadTime": 117,
-                "TotalRealTime": 10917,
-                "RunTimeChip": 1575,
-                "AnnealTimePerRun": 20,
-                "ReadoutTimePerRun": 274,
-            },
-        },
-        "TaskMetadata": {
-            "Id": "UUID_blah_1",
-            "Status": "COMPLETED",
-            "BackendArn": BraketSamplerArns.DWAVE,
-            "Shots": 5,
-        },
-    }
-    result.update(additional_metadata)
-    result.update(task_metadata)
-    return result
-
-
-@pytest.fixture
-def s3_ising_result(result):
-    result.update({"ProblemType": "ising"})
-    return json.dumps(result)
-
-
-@pytest.fixture
-def s3_qubo_result(result):
-    result.update({"ProblemType": "qubo"})
-    return json.dumps(result)
-
-
-@pytest.fixture
-def s3_destination_folder():
-    return ("test_bucket", "test_folder_prefix")
-
-
-@pytest.fixture
-def dwave_parameters():
+def braket_dwave_parameters():
     return {"postprocessingType": "SAMPLING"}
 
 
 @pytest.fixture
-def backend_parameters(dwave_parameters):
-    return {BraketSolverMetadata.DWAVE["backend_parameters_key_name"]: dwave_parameters}
+def sample_kwargs(braket_dwave_parameters, shots):
+    kwargs = copy.deepcopy(braket_dwave_parameters)
+    kwargs.update({"shots": shots})
+    return kwargs
 
 
 @pytest.fixture
-def info(additional_metadata, task_metadata):
-    info = {}
-    info.update({"AdditionalMetadata": additional_metadata})
-    info.update(task_metadata)
-    return info
+def backend_parameters(braket_dwave_parameters):
+    return {BraketSolverMetadata.DWAVE["backend_parameters_key_name"]: braket_dwave_parameters}
 
 
 @pytest.fixture
@@ -176,9 +53,11 @@ def braket_sampler(mock_qpu, braket_sampler_properties, s3_destination_folder):
 
 
 def test_parameters(braket_sampler):
-    expected_params = {param: ["parameters"] for param in BraketSolverMetadata.DWAVE["parameters"]}
+    expected_params = {
+        param: ["parameters"] for param in BraketSolverMetadata.DWAVE["parameters"].values()
+    }
     assert braket_sampler.parameters == expected_params
-    assert isinstance(braket_sampler.properties, FrozenDict)
+    assert isinstance(braket_sampler.parameters, FrozenDict)
 
 
 @pytest.mark.xfail(raises=InvalidSolverDeviceArn)
@@ -221,30 +100,20 @@ def test_sample_ising_dict_success(
     info,
     s3_destination_folder,
     backend_parameters,
-    dwave_parameters,
+    sample_kwargs,
+    shots,
 ):
-    task = Mock()
-    braket_sampler.solver.run.return_value = task
-    future = Mock()
-    task.async_result.return_value = future
-    future.result.return_value = AnnealingQuantumTaskResult.from_string(s3_ising_result)
-    actual = braket_sampler.sample_ising(linear, quadratic, **dwave_parameters)
-    call_list = braket_sampler.solver.run.call_args_list
-    args, kwargs = call_list[0]
-    problem = args[0]
-    assert isinstance(problem, Problem)
-    assert problem.problem_type == ProblemType.ISING
-    if isinstance(linear, list):
-        assert problem.linear == {0: -1, 1: 1, 2: -1}
-    else:
-        assert problem.linear == linear
-    assert problem.quadratic == quadratic
-    assert args[1] == s3_destination_folder
-    assert kwargs["backend_parameters"] == backend_parameters
-    assert isinstance(actual, SampleSet)
-    assert actual.vartype == SPIN
-    assert actual.record.sample.shape == (3, 3)
-    assert actual.info == info
+    sample_ising_common_testing(
+        linear,
+        quadratic,
+        braket_sampler,
+        s3_ising_result,
+        info,
+        s3_destination_folder,
+        backend_parameters,
+        sample_kwargs,
+        shots,
+    )
 
 
 @pytest.mark.xfail(raises=BinaryQuadraticModelStructureError)
@@ -263,25 +132,15 @@ def test_sample_qubo_dict_success(
     info,
     s3_destination_folder,
     backend_parameters,
-    dwave_parameters,
+    sample_kwargs,
+    shots,
 ):
-    task = Mock()
-    braket_sampler.solver.run.return_value = task
-    future = Mock()
-    task.async_result.return_value = future
-    future.result.return_value = AnnealingQuantumTaskResult.from_string(s3_qubo_result)
-    Q = {(0, 0): 0, (1, 2): 1, (0, 2): 0}
-    actual = braket_sampler.sample_qubo(Q, **dwave_parameters)
-    call_list = braket_sampler.solver.run.call_args_list
-    args, kwargs = call_list[0]
-    problem = args[0]
-    assert isinstance(problem, Problem)
-    assert problem.problem_type == ProblemType.QUBO
-    assert problem.linear == {0: 0}
-    assert problem.quadratic == {(1, 2): 1, (0, 2): 0}
-    assert args[1] == s3_destination_folder
-    assert kwargs["backend_parameters"] == backend_parameters
-    assert isinstance(actual, SampleSet)
-    assert actual.vartype == BINARY
-    assert actual.record.sample.shape == (3, 3)
-    assert actual.info == info
+    sample_qubo_common_testing(
+        braket_sampler,
+        s3_qubo_result,
+        info,
+        s3_destination_folder,
+        backend_parameters,
+        sample_kwargs,
+        shots,
+    )
