@@ -1,3 +1,16 @@
+# Copyright 2019-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"). You
+# may not use this file except in compliance with the License. A copy of
+# the License is located at
+#
+#     http://aws.amazon.com/apache2.0/
+#
+# or in the "license" file accompanying this file. This file is
+# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+# ANY KIND, either express or implied. See the License for the specific
+# language governing permissions and limitations under the License.
+
 import json
 from unittest.mock import Mock
 
@@ -154,9 +167,7 @@ def sample_ising_common_testing(
     """Common testing of sample_qubo for Braket samplers"""
     task = Mock()
     sampler.solver.run.return_value = task
-    future = Mock()
-    task.async_result.return_value = future
-    future.result.return_value = AnnealingQuantumTaskResult.from_string(s3_ising_result)
+    task.result.return_value = AnnealingQuantumTaskResult.from_string(s3_ising_result)
     actual = sampler.sample_ising(linear, quadratic, **sample_kwargs)
     call_list = sampler.solver.run.call_args_list
     args, kwargs = call_list[0]
@@ -183,9 +194,7 @@ def sample_qubo_common_testing(
     """Common testing of sample_qubo for Braket samplers"""
     task = Mock()
     sampler.solver.run.return_value = task
-    future = Mock()
-    task.async_result.return_value = future
-    future.result.return_value = AnnealingQuantumTaskResult.from_string(s3_qubo_result)
+    task.result.return_value = AnnealingQuantumTaskResult.from_string(s3_qubo_result)
     Q = {(0, 0): 0, (1, 2): 1, (0, 2): 0}
     actual = sampler.sample_qubo(Q, **sample_kwargs)
     call_list = sampler.solver.run.call_args_list

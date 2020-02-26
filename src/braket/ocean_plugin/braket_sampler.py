@@ -160,14 +160,14 @@ class BraketSampler(Sampler, Structured):
         ):
             raise BinaryQuadraticModelStructureError("Problem graph incompatible with solver.")
 
-        future = self.solver.run(
+        aws_task = self.solver.run(
             Problem(ProblemType.ISING, h, J), self._s3_destination_folder, **solver_kwargs
-        ).async_result()
+        )
 
         variables = set(h).union(*J)
 
         hook = BraketSampler._result_to_response_hook(variables, SPIN)
-        return SampleSet.from_future(future, hook)
+        return SampleSet.from_future(aws_task, hook)
 
     def sample_qubo(self, Q: Dict[Tuple[int, int], int], **kwargs) -> SampleSet:
         """
@@ -215,16 +215,16 @@ class BraketSampler(Sampler, Structured):
             else:
                 quadratic[(u, v)] = bias
 
-        future = self.solver.run(
+        aws_task = self.solver.run(
             Problem(ProblemType.QUBO, linear, quadratic),
             self._s3_destination_folder,
             **solver_kwargs,
-        ).async_result()
+        )
 
         variables = set().union(*Q)
 
         hook = BraketSampler._result_to_response_hook(variables, BINARY)
-        return SampleSet.from_future(future, hook)
+        return SampleSet.from_future(aws_task, hook)
 
     def _process_solver_kwargs(self, **kwargs) -> Dict[str, Any]:
         """
