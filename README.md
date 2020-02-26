@@ -10,7 +10,7 @@ Download and install Python 3.7.2 or greater from [Python.org](https://www.pytho
 If you are using Windows, choose **Add Python to environment variables** before you begin the installation.
 
 ### Amazon Braket SDK
-Download and install the Amazon Braket SDK. Follow the instructions in the [README](https://github.com/aws/braket-python-sdk/blob/master/README.md).
+Download and install the Amazon Braket SDK. Follow the instructions in the [README](https://github.com/aws/braket-python-sdk/blob/stable/latest/README.md).
 
 ### Ocean tools
 Download and install [Ocean tools](https://docs.ocean.dwavesys.com/en/latest/overview/install.html).
@@ -55,7 +55,25 @@ tox -e unit-tests -- -k 'your_test'
 To run linters and doc generators and unit tests
 ```bash
 tox
-``
+```
+
+### Integration Tests
+Set the `AWS_PROFILE`, similar to in the braket-python-sdk [README](https://github.com/aws/braket-python-sdk/blob/stable/latest/README.md).
+```bash
+export AWS_PROFILE=Your_Profile_Name
+```
+
+Create an S3 bucket in the same account as the `AWS_PROFILE` with the following naming convention `braket-ocean-plugin-integ-tests-{account_id}`.
+
+Run the tests
+```bash
+tox -e integ-tests
+```
+
+To run an individual test
+```bash
+tox -e integ-tests -- -k 'your_test'
+```
 
 ## License
 
