@@ -26,15 +26,57 @@ pip install -e braket-ocean-python-plugin
 ```
 
 ## Documentation
-You can generate the documentation for the plugin. First change directories (`cd`) to position the cursor in the (`doc`) directory.
-Then run the following command to generate the HTML documentation files:
-
+You can generate the documentation for the plugin.
 ```bash
-make html
+tox -e docs
 ```
 
 To view the generated documentation, open the following file in a browser:
 `BRAKET_OCEAN_PLUGIN_ROOT/build/documentation/html/index.html`
+
+## Usage
+
+This package provides samplers which use Braket solvers. These samplers extend abstract base classes provided in Ocean's dimod and thus have the same interfaces as other samplers in Ocean.
+
+`BraketSampler` is a structured sampler that uses Braket-formatted parameters and properties. For example, instead of `answer_mode`, which is used for D-Wave QPU samplers, Braket uses `resultFormat` instead.
+Below is a sample example of solving the [minimum vertex cover](https://en.wikipedia.org/wiki/Vertex_cover) problem using `BraketSampler`.
+
+```python
+from braket.ocean_plugin import BraketSamplerArns, BraketSampler
+import networkx as nx
+import dwave_networkx as dnx
+from dwave.system.composites import EmbeddingComposite
+
+s3_destination_folder = ("your-s3-bucket", "your-folder")
+sampler = BraketSampler(s3_destination_folder, BraketSamplerArns.DWAVE)
+
+star_graph = nx.star_graph(4) # star graph where node 0 is connected to 4 other nodes
+
+# EmbeddingComposite automatically maps the problem to the structure of the solver.
+embedded_sampler = EmbeddingComposite(sampler)
+# the below result should be 0 because node 0 is connected to the 4 other nodes in a star graph
+print(dnx.min_vertex_cover(star_graph, embedded_sampler, resultFormat="HISTOGRAM"))
+```
+
+`BraketDWaveSampler` is a structured sampler that uses D-Wave-formatted parameters and properties. It is interchangeable with D-Wave's `DWaveSampler`.
+Below is the same example as above of solving the minimum vertext cover problem. Only the parameter inputs to the solver have been changed to be D-Wave formatted (e.g. `answer_mode` instead of `resultFormat`).
+
+```python
+from braket.ocean_plugin import BraketSamplerArns, BraketDWaveSampler
+import networkx as nx
+import dwave_networkx as dnx
+from dwave.system.composites import EmbeddingComposite
+
+s3_destination_folder = ("your-s3-bucket", "your-folder")
+sampler = BraketDWaveSampler(s3_destination_folder, BraketSamplerArns.DWAVE)
+
+star_graph = nx.star_graph(4) # star graph where node 0 is connected to 4 other nodes
+
+# EmbeddingComposite automatically maps the problem to the structure of the solver.
+embedded_sampler = EmbeddingComposite(sampler)
+# the below result should be 0 because node 0 is connected to the 4 other nodes in a star graph
+print(dnx.min_vertex_cover(star_graph, embedded_sampler, answer_mode="histogram"))
+```
 
 ## Install Additional Packages for Testing
 Make sure to install test dependencies first:
@@ -78,4 +120,3 @@ tox -e integ-tests -- -k 'your_test'
 ## License
 
 This project is licensed under the Apache-2.0 License.
-
