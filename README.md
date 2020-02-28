@@ -63,7 +63,7 @@ Set the `AWS_PROFILE`, similar to in the braket-python-sdk [README](https://gith
 export AWS_PROFILE=Your_Profile_Name
 ```
 
-Create an S3 bucket in the same account as the `AWS_PROFILE` with the following naming convention `braket-ocean-plugin-integ-tests-{account_id}`.
+Running the integration tests will create an S3 bucket in the same account as the `AWS_PROFILE` with the following naming convention `braket-ocean-plugin-integ-tests-{account_id}`.
 
 Run the tests
 ```bash

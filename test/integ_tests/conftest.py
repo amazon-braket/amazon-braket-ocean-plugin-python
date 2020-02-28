@@ -58,7 +58,7 @@ def s3_bucket(s3_resource, boto_session):
 
 @pytest.fixture(scope="module")
 def s3_prefix():
-    """Returns the module path of the test, e.g. integ_tests/test_simulator_quantum_task"""
+    """Returns the module path of the test, e.g. integ_tests/test_braket_sampler_running"""
 
     # current test path, e.g. ...
     # test/integ_tests/test_simulator_quantum_task.py::test_simulator_quantum_task (setup)
