@@ -27,6 +27,15 @@ pip install -e braket-ocean-python-plugin
 
 ## Documentation
 You can generate the documentation for the plugin.
+
+First, you must have tox installed.
+
+```bash
+pip install tox
+```
+
+Then, you can run the following command with tox to generate the documentation:
+
 ```bash
 tox -e docs
 ```
@@ -54,7 +63,8 @@ star_graph = nx.star_graph(4) # star graph where node 0 is connected to 4 other 
 
 # EmbeddingComposite automatically maps the problem to the structure of the solver.
 embedded_sampler = EmbeddingComposite(sampler)
-# the below result should be 0 because node 0 is connected to the 4 other nodes in a star graph
+
+# The below result should be 0 because node 0 is connected to the 4 other nodes in a star graph
 print(dnx.min_vertex_cover(star_graph, embedded_sampler, resultFormat="HISTOGRAM"))
 ```
 
@@ -74,9 +84,11 @@ star_graph = nx.star_graph(4) # star graph where node 0 is connected to 4 other 
 
 # EmbeddingComposite automatically maps the problem to the structure of the solver.
 embedded_sampler = EmbeddingComposite(sampler)
-# the below result should be 0 because node 0 is connected to the 4 other nodes in a star graph
+
+# The below result should be 0 because node 0 is connected to the 4 other nodes in a star graph
 print(dnx.min_vertex_cover(star_graph, embedded_sampler, answer_mode="histogram"))
 ```
+These usage examples can also be found as python scripts in the `BRAKET_OCEAN_PLUGIN_ROOT/examples/` folder.
 
 ## Install Additional Packages for Testing
 Make sure to install test dependencies first:
