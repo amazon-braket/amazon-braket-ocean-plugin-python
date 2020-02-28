@@ -40,6 +40,7 @@ setup(
             "sphinx",
             "sphinx-rtd-theme",
             "tox",
+            "dwave-ocean-sdk",
         ]
     },
 )
