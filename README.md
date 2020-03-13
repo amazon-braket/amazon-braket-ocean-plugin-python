@@ -18,7 +18,31 @@ Download and install [Ocean tools](https://docs.ocean.dwavesys.com/en/latest/ove
 pip install dwave-ocean-sdk
 ```
 
-## Install the Amazon Braket Ocean plug-in package
+## Setting up the Amazon Braket Ocean Python Plugin
+Use the steps in this section to install and configure the Amazon Braket Python plugin for your environment. You should perform the steps in the order in which they are included in this document.
+
+### Download the Amazon Braket Ocean Python Plugin GitHub Repository
+The easiest way to get the plugin is to download it directly from the GitHub site. Because the repositories are private during the Private Beta period, an SSH key is required to access the files remotely from a terminal session. If you download them directly from the GitHub site, you can just extract the files to your system or virtual environment without the extra steps of using an SSH key. You need to log in to GitHub using the account that was whitelisted for the Amazon Braket (Private Beta).
+
+Use the following links to download the Amazon Braket Ocean Python Plugin:
+- [braket-ocean-python-plugin](https://github.com/aws/braket-ocean-python-plugin/archive/master.zip)
+
+### Extract the plugin .zip files
+Because the files were downloaded directly from GitHub, the folder in the .zip file includes the name of the branch of the GitHub repo that was downloaded, in this case the `master` branch. But to use the files in the plugin, we need to rename the folder to the original name. In the repository, master will contain the stable changes for users to download.
+
+**To rename the folders in the plugin .zip files**
+First, extract the .zip files to a location of your choosing. Then open the location where you extracted the folders to. You can use either the GUI file system tools in your OS, or the command line. You should see 2 folders with the following names:
+- braket-ocean-python-plugin-master
+
+Rename the folders to the following:
+- braket-ocean-python-plugin
+
+Then copy the renamed files and paste them into the `braketvirtenv` folder where you created a virtual environment. Your folder structure should look like this:
+```bash
+..\YourFolder\braketvirtenv\braket-ocean-python-plugin\
+```
+
+### Install the Amazon Braket Ocean plug-in package
 Use the following commands to install the package:
 
 ```bash
