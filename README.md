@@ -50,7 +50,18 @@ pip install -e braket-ocean-python-plugin
 ```
 
 ## Documentation
-You can generate the documentation for the plugin.
+
+To view the API Reference for the plugin, either download the .zip file or build it in your local environment.
+
+**To download the API Reference .zip file**
+
+Use the following command to download the .zip file
+```bash
+aws s3 cp s3://braket-external-assets-prod-us-west-2/sdk-docs/Braket-Ocean-Plugin-Documentation.zip Braket-Ocean-Plugin-Documentationn.zip
+```
+Then extract the `Braket-Ocean-Plugin-Documentation.zip` file to your local environment. After you extract the file, open the index.html file in the `Braket-Ocean-Plugin-Documentation` folder.
+
+**To generate the API Reference HTML in your local environment**
 
 First, you must have tox installed.
 
