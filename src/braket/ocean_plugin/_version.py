@@ -11,10 +11,8 @@
 # ANY KIND, either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
 
-from braket.ocean_plugin.braket_dwave_sampler import BraketDWaveSampler  # noqa: F401
-from braket.ocean_plugin.braket_sampler import BraketSampler  # noqa: F401
-from braket.ocean_plugin.braket_sampler_arns import BraketSamplerArns  # noqa: F401
-from braket.ocean_plugin.braket_solver_metadata import BraketSolverMetadata  # noqa: F401
-from braket.ocean_plugin.exceptions import InvalidSolverDeviceArn  # noqa: F401
+"""Version information.
+   Version number (major.minor.patch[-label])
+"""
 
-from ._version import __version__  # noqa: F401
+__version__ = "0.1.3"
