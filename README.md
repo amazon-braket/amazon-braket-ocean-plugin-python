@@ -49,6 +49,19 @@ Use the following commands to install the package:
 pip install -e braket-ocean-python-plugin
 ```
 
+You can check your currently installed version of `braket-ocean-python-plugin` with `pip show`:
+
+```bash
+pip show braket-ocean-python-plugin
+```
+
+or alternatively from within Python:
+
+```
+>>> from braket import ocean_plugin
+>>> ocean_plugin.__version__
+```
+
 ## Documentation
 
 To view the API Reference for the plugin, either download the .zip file or build it in your local environment.
