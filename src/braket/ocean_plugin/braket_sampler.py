@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import copy
 from functools import lru_cache
+from logging import Logger, getLogger
 from typing import Any, Dict, List, Tuple, Union
 
 from boltons.dictutils import FrozenDict
@@ -37,6 +38,8 @@ class BraketSampler(Sampler, Structured):
             and key (index 1) that is the results destination folder in S3.
         device_arn (str): AWS quantum device arn.
         aws_session (AwsSession): AwsSession to call AWS with.
+        logger (Logger): Python Logger object with which to write logs, such as `QuantumTask`
+            statuses while polling for task to complete. Default is `getLogger(__name__)`
 
     Raises:
         InvalidSolverDeviceArn: If provided device ARN for solver is unsupported.
@@ -52,12 +55,14 @@ class BraketSampler(Sampler, Structured):
         s3_destination_folder: AwsSession.S3DestinationFolder,
         device_arn: str,
         aws_session: AwsSession = None,
+        logger: Logger = getLogger(__name__),
     ):
         self._s3_destination_folder = s3_destination_folder
 
         if device_arn not in get_arn_to_enum_name_mapping():
             raise InvalidSolverDeviceArn(f"Invalid device ARN {device_arn}")
         self._device_arn = device_arn
+        self._logger = logger
 
         self.solver = AwsQpu(device_arn, aws_session)
 
@@ -161,7 +166,10 @@ class BraketSampler(Sampler, Structured):
             raise BinaryQuadraticModelStructureError("Problem graph incompatible with solver.")
 
         aws_task = self.solver.run(
-            Problem(ProblemType.ISING, h, J), self._s3_destination_folder, **solver_kwargs
+            Problem(ProblemType.ISING, h, J),
+            self._s3_destination_folder,
+            logger=self._logger,
+            **solver_kwargs,
         )
 
         variables = set(h).union(*J)
@@ -218,6 +226,7 @@ class BraketSampler(Sampler, Structured):
         aws_task = self.solver.run(
             Problem(ProblemType.QUBO, linear, quadratic),
             self._s3_destination_folder,
+            logger=self._logger,
             **solver_kwargs,
         )
 
@@ -274,6 +283,7 @@ class BraketSampler(Sampler, Structured):
         def _hook(computation):
             result: AnnealingQuantumTaskResult = computation.result()
             # get the samples. The future will return all spins so filter for the ones in variables
+
             samples = [[sample[v] for v in variables] for sample in result.record_array.solution]
             energy = result.record_array.value
             num_occurrences = result.record_array.solution_count

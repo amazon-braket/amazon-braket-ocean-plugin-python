@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import copy
 from functools import lru_cache
+from logging import Logger, getLogger
 from typing import Any, Dict, List, Tuple, Union
 
 from boltons.dictutils import FrozenDict
@@ -34,6 +35,8 @@ class BraketDWaveSampler(BraketSampler):
             and key (index 1) that is the results destination folder in S3.
         device_arn (str): AWS quantum device arn. Default is D-Wave.
         aws_session (AwsSession): AwsSession to call AWS with.
+        logger (Logger): Python Logger object with which to write logs, such as `QuantumTask`
+            statuses while polling for task to complete. Default is `getLogger(__name__)`
 
     Examples:
         >>> from braket.ocean_plugin import BraketDWaveSampler
@@ -46,8 +49,9 @@ class BraketDWaveSampler(BraketSampler):
         s3_destination_folder: AwsSession.S3DestinationFolder,
         device_arn: str = BraketSamplerArns.DWAVE,
         aws_session: AwsSession = None,
+        logger: Logger = getLogger(__name__),
     ):
-        super().__init__(s3_destination_folder, device_arn, aws_session)
+        super().__init__(s3_destination_folder, device_arn, aws_session, logger)
 
     @property
     @lru_cache(maxsize=1)

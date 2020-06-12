@@ -12,6 +12,7 @@
 # language governing permissions and limitations under the License.
 
 import json
+import logging
 from unittest.mock import Mock
 
 import pytest
@@ -153,6 +154,11 @@ def info(additional_metadata, task_metadata):
     return info
 
 
+@pytest.fixture
+def logger():
+    return logging.getLogger("newLogger")
+
+
 def sample_ising_common_testing(
     linear,
     quadratic,
@@ -163,6 +169,7 @@ def sample_ising_common_testing(
     backend_parameters,
     sample_kwargs,
     shots,
+    logger,
 ):
     """Common testing of sample_qubo for Braket samplers"""
     task = Mock()
@@ -180,6 +187,7 @@ def sample_ising_common_testing(
         assert problem.linear == linear
     assert problem.quadratic == quadratic
     assert args[1] == s3_destination_folder
+    assert kwargs["logger"] == logger
     assert kwargs["backend_parameters"] == backend_parameters
     assert kwargs["shots"] == shots
     assert isinstance(actual, SampleSet)
@@ -189,7 +197,14 @@ def sample_ising_common_testing(
 
 
 def sample_qubo_common_testing(
-    sampler, s3_qubo_result, info, s3_destination_folder, backend_parameters, sample_kwargs, shots
+    sampler,
+    s3_qubo_result,
+    info,
+    s3_destination_folder,
+    backend_parameters,
+    sample_kwargs,
+    shots,
+    logger,
 ):
     """Common testing of sample_qubo for Braket samplers"""
     task = Mock()
@@ -205,6 +220,7 @@ def sample_qubo_common_testing(
     assert problem.linear == {0: 0}
     assert problem.quadratic == {(1, 2): 1, (0, 2): 0}
     assert args[1] == s3_destination_folder
+    assert kwargs["logger"] == logger
     assert kwargs["backend_parameters"] == backend_parameters
     assert kwargs["shots"] == shots
     assert isinstance(actual, SampleSet)
