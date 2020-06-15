@@ -45,10 +45,10 @@ def backend_parameters(braket_dwave_parameters):
 
 @pytest.fixture
 @patch("braket.ocean_plugin.braket_sampler.AwsQpu")
-def braket_sampler(mock_qpu, braket_sampler_properties, s3_destination_folder):
+def braket_sampler(mock_qpu, braket_sampler_properties, s3_destination_folder, logger):
     mock_qpu.return_value.properties = braket_sampler_properties
     arn = BraketSamplerArns.DWAVE
-    sampler = BraketSampler(s3_destination_folder, arn, Mock())
+    sampler = BraketSampler(s3_destination_folder, arn, Mock(), logger)
     return sampler
 
 
@@ -102,6 +102,7 @@ def test_sample_ising_dict_success(
     backend_parameters,
     sample_kwargs,
     shots,
+    logger,
 ):
     sample_ising_common_testing(
         linear,
@@ -113,6 +114,7 @@ def test_sample_ising_dict_success(
         backend_parameters,
         sample_kwargs,
         shots,
+        logger,
     )
 
 
@@ -134,6 +136,7 @@ def test_sample_qubo_dict_success(
     backend_parameters,
     sample_kwargs,
     shots,
+    logger,
 ):
     sample_qubo_common_testing(
         braket_sampler,
@@ -143,4 +146,5 @@ def test_sample_qubo_dict_success(
         backend_parameters,
         sample_kwargs,
         shots,
+        logger,
     )

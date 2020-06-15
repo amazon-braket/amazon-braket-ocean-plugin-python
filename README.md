@@ -138,6 +138,10 @@ print(dnx.min_vertex_cover(star_graph, embedded_sampler, answer_mode="histogram"
 ```
 These usage examples can also be found as python scripts in the `BRAKET_OCEAN_PLUGIN_ROOT/examples/` folder.
 
+### Debugging Logs
+
+Tasks sent to QPUs don't always complete right away. To view task status, you can enable debugging logs. An example of how to enable these logs is included in the repo: `BRAKET_OCEAN_PLUGIN_ROOT/examples/debug_*`. These examples enable task logging so that status updates are continuously printed to console after a quantum task is executed. The logs can also be configured to save to a file or output to another stream. You can use the debugging example to get information on the tasks you submit, such as the current status, so that you know when your task completes.
+
 ## Install Additional Packages for Testing
 Make sure to install test dependencies first:
 ```bash
