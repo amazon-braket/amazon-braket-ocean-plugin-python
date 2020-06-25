@@ -16,7 +16,7 @@ from __future__ import annotations
 import copy
 from functools import lru_cache
 from logging import Logger, getLogger
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, List, Set, Tuple, Union
 
 from boltons.dictutils import FrozenDict
 from braket.annealing.problem import Problem, ProblemType
@@ -300,7 +300,7 @@ class BraketSampler(Sampler, Structured):
         return solver_kwargs
 
     @staticmethod
-    def _result_to_response_hook(variables: Optional[Set[int]]):
+    def _result_to_response_hook(variables: Set[int] = None):
         def _hook(computation):
             result: AnnealingQuantumTaskResult = computation.result()
             # get the samples. The future will return all spins so filter for the ones in variables
@@ -325,7 +325,7 @@ class BraketSampler(Sampler, Structured):
         return _hook
 
     @staticmethod
-    def _vars_from_variables(result: AnnealingQuantumTaskResult, variables: Optional[Set[int]]):
+    def _vars_from_variables(result: AnnealingQuantumTaskResult, variables: Set[int] = None):
         if variables:
             return variables
         if result.additional_metadata and result.additional_metadata.get("DWaveMetadata", {}).get(
