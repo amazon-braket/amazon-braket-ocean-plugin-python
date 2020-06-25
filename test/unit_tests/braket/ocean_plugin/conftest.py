@@ -137,6 +137,12 @@ def s3_qubo_result(result):
 
 
 @pytest.fixture
+def s3_unknown_result(result):
+    result.update({"ProblemType": "unknown"})
+    return json.dumps(result)
+
+
+@pytest.fixture
 def s3_destination_folder():
     return ("test_bucket", "test_folder_prefix")
 

@@ -16,11 +16,11 @@ from __future__ import annotations
 import copy
 from functools import lru_cache
 from logging import Logger, getLogger
-from typing import Any, Dict, List, Tuple, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 from boltons.dictutils import FrozenDict
 from braket.annealing.problem import Problem, ProblemType
-from braket.aws import AwsQpu, AwsSession
+from braket.aws import AwsQpu, AwsQuantumTask, AwsSession
 from braket.ocean_plugin.braket_sampler_arns import get_arn_to_enum_name_mapping
 from braket.ocean_plugin.braket_solver_metadata import BraketSolverMetadata
 from braket.ocean_plugin.exceptions import InvalidSolverDeviceArn
@@ -174,8 +174,7 @@ class BraketSampler(Sampler, Structured):
 
         variables = set(h).union(*J)
 
-        hook = BraketSampler._result_to_response_hook(variables, SPIN)
-        return SampleSet.from_future(aws_task, hook)
+        return BraketSampler.get_task_sample_set(aws_task, variables)
 
     def sample_qubo(self, Q: Dict[Tuple[int, int], int], **kwargs) -> SampleSet:
         """
@@ -232,8 +231,30 @@ class BraketSampler(Sampler, Structured):
 
         variables = set().union(*Q)
 
-        hook = BraketSampler._result_to_response_hook(variables, BINARY)
-        return SampleSet.from_future(aws_task, hook)
+        return BraketSampler.get_task_sample_set(aws_task, variables)
+
+    @staticmethod
+    def get_task_sample_set(task: AwsQuantumTask, variables: Set[int] = None) -> SampleSet:
+        """
+        Get SampleSet from an `AwsQuantumTask` object
+
+        Args:
+            task (AwsQuantumTask): task from which to get `SampleSet`
+            variables (Set[int], optional): variables for samples in `SampleSet`.
+                The default is the set of active variables for D-Wave.
+                If there are no active variables marked as part of the task result,
+                the default is `list(range(result.variable_count))`.
+
+        Returns:
+            :class:`dimod.SampleSet`: A `dimod` :obj:`~dimod.SampleSet` object.
+
+        Examples:
+            >>> from braket.ocean_plugin import BraketSampler
+            >>> from braket.aws import AwsQuantumTask
+            >>> sample_set = sampler.get_task_sample_set(AwsQuantumTask(arn="your_arn"))
+        """
+        hook = BraketSampler._result_to_response_hook(variables)
+        return SampleSet.from_future(task, hook)
 
     def _process_solver_kwargs(self, **kwargs) -> Dict[str, Any]:
         """
@@ -279,21 +300,21 @@ class BraketSampler(Sampler, Structured):
         return solver_kwargs
 
     @staticmethod
-    def _result_to_response_hook(variables, vartype):
+    def _result_to_response_hook(variables: Optional[Set[int]]):
         def _hook(computation):
             result: AnnealingQuantumTaskResult = computation.result()
             # get the samples. The future will return all spins so filter for the ones in variables
-
-            samples = [[sample[v] for v in variables] for sample in result.record_array.solution]
+            vars = BraketSampler._vars_from_variables(result, variables)
+            samples = [[sample[v] for v in vars] for sample in result.record_array.solution]
             energy = result.record_array.value
             num_occurrences = result.record_array.solution_count
             info = {
                 "TaskMetadata": result.task_metadata,
                 "AdditionalMetadata": result.additional_metadata,
             }
-
+            vartype = BraketSampler._vartype_from_problem_type(result.problem_type)
             return SampleSet.from_samples(
-                (samples, variables),
+                (samples, vars),
                 info=info,
                 vartype=vartype,
                 energy=energy,
@@ -302,3 +323,22 @@ class BraketSampler(Sampler, Structured):
             )
 
         return _hook
+
+    @staticmethod
+    def _vars_from_variables(result: AnnealingQuantumTaskResult, variables: Optional[Set[int]]):
+        if variables:
+            return variables
+        if result.additional_metadata and result.additional_metadata.get("DWaveMetadata", {}).get(
+            "ActiveVariables"
+        ):
+            return set(result.additional_metadata.get("DWaveMetadata", {}).get("ActiveVariables"))
+        return list(range(result.variable_count))
+
+    @staticmethod
+    def _vartype_from_problem_type(problem_type: str) -> Union[SPIN, BINARY]:
+        if problem_type == "qubo":
+            return BINARY
+        elif problem_type == "ising":
+            return SPIN
+        else:
+            raise ValueError(f"Unknown problem type {problem_type}")
