@@ -16,7 +16,7 @@ from __future__ import annotations
 import copy
 from functools import lru_cache
 from logging import Logger, getLogger
-from typing import Any, Dict, List, Set, Tuple, Union
+from typing import Any, Dict, FrozenSet, List, Set, Tuple, Union
 
 from boltons.dictutils import FrozenDict
 from braket.annealing.problem import Problem, ProblemType
@@ -49,6 +49,9 @@ class BraketSampler(Sampler, Structured):
         >>> s3_destination_folder = ('test_bucket', 'test_folder')
         >>> sampler = BraketSampler(s3_destination_folder, BraketSamplerArns.DWAVE)
     """
+
+    ISING_PROBLEM_TYPE = "ising"
+    QUBO_PROBLEM_TYPE = "qubo"
 
     def __init__(
         self,
@@ -119,7 +122,6 @@ class BraketSampler(Sampler, Structured):
     ) -> SampleSet:
         """
         Sample from the specified Ising model.
-
         Args:
             h (dict/list):
                 Linear biases of the Ising model. If a dict, should be of the
@@ -133,18 +135,14 @@ class BraketSampler(Sampler, Structured):
                 Quadratic biases of the Ising model.
             **kwargs:
                 Optional keyword arguments for the sampling method in Braket boto3 format
-
         Returns:
             :class:`dimod.SampleSet`: A `dimod` :obj:`~dimod.SampleSet` object.
-
         Raises:
             BinaryQuadraticModelStructureError: If problem graph is incompatible with solver
             ValueError: If keyword argument is unsupported by solver
-
         Examples:
             This example submits a two-variable Ising problem mapped directly to qubits
             0 and 1.
-
             >>> from braket.ocean_plugin import BraketSampler
             >>> sampler = BraketSampler(s3_destination_folder, BraketSamplerArns.DWAVE)
             >>> sampleset = sampler.sample_ising({0: -1, 1: 1}, {}, resultFormat="HISTOGRAM")
@@ -179,24 +177,19 @@ class BraketSampler(Sampler, Structured):
     def sample_qubo(self, Q: Dict[Tuple[int, int], int], **kwargs) -> SampleSet:
         """
         Sample from the specified QUBO.
-
         Args:
             Q (dict):
                 Coefficients of a quadratic unconstrained binary optimization (QUBO) model.
             **kwargs:
                 Optional keyword arguments for the sampling method in Braket boto3 format
-
         Returns:
             :class:`dimod.SampleSet`: A `dimod` :obj:`~dimod.SampleSet` object.
-
         Raises:
             BinaryQuadraticModelStructureError: If problem graph is incompatible with solver
             ValueError: If keyword argument is unsupported by solver
-
         Examples:
             This example submits a two-variable QUBO mapped directly to qubits
             0 and 4 on a sampler
-
             >>> from braket.ocean_plugin import BraketSampler
             >>> sampler = BraketSampler(s3_destination_folder, BraketSamplerArns.DWAVE)
             >>> Q = {(0, 0): -1, (4, 4): -1, (0, 4): 2}
@@ -325,20 +318,21 @@ class BraketSampler(Sampler, Structured):
         return _hook
 
     @staticmethod
-    def _vars_from_variables(result: AnnealingQuantumTaskResult, variables: Set[int] = None):
+    def _vars_from_variables(
+        result: AnnealingQuantumTaskResult, variables: Set[int] = None
+    ) -> FrozenSet[int]:
         if variables:
-            return variables
-        if result.additional_metadata and result.additional_metadata.get("DWaveMetadata", {}).get(
-            "ActiveVariables"
-        ):
-            return set(result.additional_metadata.get("DWaveMetadata", {}).get("ActiveVariables"))
-        return list(range(result.variable_count))
+            return frozenset(variables)
+        additional_metadata = result.additional_metadata.get("DWaveMetadata", {})
+        if "ActiveVariables" in additional_metadata:
+            return frozenset(additional_metadata.get("ActiveVariables"))
+        return frozenset(list(range(result.variable_count)))
 
     @staticmethod
     def _vartype_from_problem_type(problem_type: str) -> Union[SPIN, BINARY]:
-        if problem_type == "qubo":
+        if problem_type == BraketSampler.QUBO_PROBLEM_TYPE:
             return BINARY
-        elif problem_type == "ising":
+        elif problem_type == BraketSampler.ISING_PROBLEM_TYPE:
             return SPIN
         else:
             raise ValueError(f"Unknown problem type {problem_type}")
