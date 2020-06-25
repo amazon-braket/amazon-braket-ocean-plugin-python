@@ -17,7 +17,7 @@ from unittest.mock import Mock
 
 import pytest
 from braket.annealing.problem import Problem, ProblemType
-from braket.ocean_plugin import BraketSamplerArns
+from braket.ocean_plugin import BraketSampler, BraketSamplerArns
 from braket.tasks import AnnealingQuantumTaskResult
 from dimod import BINARY, SPIN, SampleSet
 
@@ -126,13 +126,19 @@ def result(additional_metadata, task_metadata):
 
 @pytest.fixture
 def s3_ising_result(result):
-    result.update({"ProblemType": "ising"})
+    result.update({"ProblemType": BraketSampler.ISING_PROBLEM_TYPE})
     return json.dumps(result)
 
 
 @pytest.fixture
 def s3_qubo_result(result):
-    result.update({"ProblemType": "qubo"})
+    result.update({"ProblemType": BraketSampler.QUBO_PROBLEM_TYPE})
+    return json.dumps(result)
+
+
+@pytest.fixture
+def s3_unknown_result(result):
+    result.update({"ProblemType": "unknown"})
     return json.dumps(result)
 
 
