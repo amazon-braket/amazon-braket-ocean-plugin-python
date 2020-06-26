@@ -171,7 +171,7 @@ class BraketSampler(Sampler, Structured):
     ) -> QuantumTask:
         """
         Sample from the specified Ising model and return a `QuantumTask`. This has the same inputs
-        as `BraketSampler.sample_qubo`.
+        as `BraketSampler.sample_ising`.
 
         Args:
             h (dict/list):
