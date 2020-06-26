@@ -24,7 +24,12 @@ from braket.ocean_plugin import (
     InvalidSolverDeviceArn,
 )
 from braket.tasks import AnnealingQuantumTaskResult
-from conftest import sample_ising_common_testing, sample_qubo_common_testing
+from conftest import (
+    sample_ising_common_testing,
+    sample_ising_quantum_task_common_testing,
+    sample_qubo_common_testing,
+    sample_qubo_quantum_task_common_testing,
+)
 from dimod.exceptions import BinaryQuadraticModelStructureError
 
 
@@ -94,7 +99,7 @@ def test_sample_ising_value_error(braket_sampler):
 
 
 @pytest.mark.parametrize("linear, quadratic", [({0: -1, 1: 1, 2: -1}, {}), ([-1, 1, -1], {})])
-def test_sample_ising_dict_success(
+def test_sample_ising_success(
     linear,
     quadratic,
     braket_sampler,
@@ -112,6 +117,31 @@ def test_sample_ising_dict_success(
         braket_sampler,
         s3_ising_result,
         info,
+        s3_destination_folder,
+        backend_parameters,
+        sample_kwargs,
+        shots,
+        logger,
+    )
+
+
+@pytest.mark.parametrize("linear, quadratic", [({0: -1, 1: 1, 2: -1}, {}), ([-1, 1, -1], {})])
+def test_sample_ising_quantum_task_success(
+    linear,
+    quadratic,
+    braket_sampler,
+    s3_ising_result,
+    s3_destination_folder,
+    backend_parameters,
+    sample_kwargs,
+    shots,
+    logger,
+):
+    sample_ising_quantum_task_common_testing(
+        linear,
+        quadratic,
+        braket_sampler,
+        s3_ising_result,
         s3_destination_folder,
         backend_parameters,
         sample_kwargs,
@@ -175,6 +205,26 @@ def test_sample_qubo_dict_success(
         braket_sampler,
         s3_qubo_result,
         info,
+        s3_destination_folder,
+        backend_parameters,
+        sample_kwargs,
+        shots,
+        logger,
+    )
+
+
+def test_sample_qubo_quantum_task_dict_success(
+    braket_sampler,
+    s3_qubo_result,
+    s3_destination_folder,
+    backend_parameters,
+    sample_kwargs,
+    shots,
+    logger,
+):
+    sample_qubo_quantum_task_common_testing(
+        braket_sampler,
+        s3_qubo_result,
         s3_destination_folder,
         backend_parameters,
         sample_kwargs,

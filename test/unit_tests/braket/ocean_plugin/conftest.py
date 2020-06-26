@@ -165,6 +165,61 @@ def logger():
     return logging.getLogger("newLogger")
 
 
+def _sample_common_asserts(
+    sampler,
+    s3_destination_folder,
+    backend_parameters,
+    shots,
+    logger,
+    linear,
+    quadratic,
+    problem_type,
+):
+    call_list = sampler.solver.run.call_args_list
+    args, kwargs = call_list[0]
+    assert args[1] == s3_destination_folder
+    assert kwargs["logger"] == logger
+    assert kwargs["backend_parameters"] == backend_parameters
+    assert kwargs["shots"] == shots
+    problem = args[0]
+    assert isinstance(problem, Problem)
+    assert problem.problem_type == problem_type
+    if isinstance(linear, list):
+        assert problem.linear == {0: -1, 1: 1, 2: -1}
+    else:
+        assert problem.linear == linear
+    assert problem.quadratic == quadratic
+
+
+def sample_ising_quantum_task_common_testing(
+    linear,
+    quadratic,
+    sampler,
+    s3_ising_result,
+    s3_destination_folder,
+    backend_parameters,
+    sample_kwargs,
+    shots,
+    logger,
+):
+    """Common testing of sample_ising_quantum_task for Braket samplers"""
+    task = Mock()
+    sampler.solver.run.return_value = task
+    task.result.return_value = AnnealingQuantumTaskResult.from_string(s3_ising_result)
+    actual = sampler.sample_ising_quantum_task(linear, quadratic, **sample_kwargs)
+    _sample_common_asserts(
+        sampler,
+        s3_destination_folder,
+        backend_parameters,
+        shots,
+        logger,
+        linear,
+        quadratic,
+        ProblemType.ISING,
+    )
+    assert actual == task
+
+
 def sample_ising_common_testing(
     linear,
     quadratic,
@@ -177,29 +232,53 @@ def sample_ising_common_testing(
     shots,
     logger,
 ):
-    """Common testing of sample_qubo for Braket samplers"""
+    """Common testing of sample_ising for Braket samplers"""
     task = Mock()
     sampler.solver.run.return_value = task
     task.result.return_value = AnnealingQuantumTaskResult.from_string(s3_ising_result)
     actual = sampler.sample_ising(linear, quadratic, **sample_kwargs)
-    call_list = sampler.solver.run.call_args_list
-    args, kwargs = call_list[0]
-    problem = args[0]
-    assert isinstance(problem, Problem)
-    assert problem.problem_type == ProblemType.ISING
-    if isinstance(linear, list):
-        assert problem.linear == {0: -1, 1: 1, 2: -1}
-    else:
-        assert problem.linear == linear
-    assert problem.quadratic == quadratic
-    assert args[1] == s3_destination_folder
-    assert kwargs["logger"] == logger
-    assert kwargs["backend_parameters"] == backend_parameters
-    assert kwargs["shots"] == shots
+    _sample_common_asserts(
+        sampler,
+        s3_destination_folder,
+        backend_parameters,
+        shots,
+        logger,
+        linear,
+        quadratic,
+        ProblemType.ISING,
+    )
     assert isinstance(actual, SampleSet)
     assert actual.vartype == SPIN
     assert actual.record.sample.shape == (3, 3)
     assert actual.info == info
+
+
+def sample_qubo_quantum_task_common_testing(
+    sampler,
+    s3_qubo_result,
+    s3_destination_folder,
+    backend_parameters,
+    sample_kwargs,
+    shots,
+    logger,
+):
+    """Common testing of sample_qubo_quantum_task for Braket samplers"""
+    task = Mock()
+    sampler.solver.run.return_value = task
+    task.result.return_value = AnnealingQuantumTaskResult.from_string(s3_qubo_result)
+    Q = {(0, 0): 0, (1, 2): 1, (0, 2): 0}
+    actual = sampler.sample_qubo_quantum_task(Q, **sample_kwargs)
+    _sample_common_asserts(
+        sampler,
+        s3_destination_folder,
+        backend_parameters,
+        shots,
+        logger,
+        {0: 0},
+        {(1, 2): 1, (0, 2): 0},
+        ProblemType.QUBO,
+    )
+    assert actual == task
 
 
 def sample_qubo_common_testing(
@@ -218,17 +297,16 @@ def sample_qubo_common_testing(
     task.result.return_value = AnnealingQuantumTaskResult.from_string(s3_qubo_result)
     Q = {(0, 0): 0, (1, 2): 1, (0, 2): 0}
     actual = sampler.sample_qubo(Q, **sample_kwargs)
-    call_list = sampler.solver.run.call_args_list
-    args, kwargs = call_list[0]
-    problem = args[0]
-    assert isinstance(problem, Problem)
-    assert problem.problem_type == ProblemType.QUBO
-    assert problem.linear == {0: 0}
-    assert problem.quadratic == {(1, 2): 1, (0, 2): 0}
-    assert args[1] == s3_destination_folder
-    assert kwargs["logger"] == logger
-    assert kwargs["backend_parameters"] == backend_parameters
-    assert kwargs["shots"] == shots
+    _sample_common_asserts(
+        sampler,
+        s3_destination_folder,
+        backend_parameters,
+        shots,
+        logger,
+        {0: 0},
+        {(1, 2): 1, (0, 2): 0},
+        ProblemType.QUBO,
+    )
     assert isinstance(actual, SampleSet)
     assert actual.vartype == BINARY
     assert actual.record.sample.shape == (3, 3)

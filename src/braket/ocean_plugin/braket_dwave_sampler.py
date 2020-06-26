@@ -23,6 +23,7 @@ from braket.aws import AwsSession
 from braket.ocean_plugin.braket_sampler import BraketSampler
 from braket.ocean_plugin.braket_sampler_arns import BraketSamplerArns, get_arn_to_enum_name_mapping
 from braket.ocean_plugin.braket_solver_metadata import BraketSolverMetadata
+from braket.tasks import QuantumTask
 from dimod import SampleSet
 
 
@@ -99,59 +100,134 @@ class BraketDWaveSampler(BraketSampler):
     ) -> SampleSet:
         """
         Sample from the specified Ising model.
-            Args:
-                h (dict/list):
-                    Linear biases of the Ising model. If a dict, should be of the
-                    form `{v: bias, ...}` where `v` is a spin-valued variable and
-                    `bias` is its associated bias. If a list, it is treated as a
-                    list of biases where the indices are the variable labels,
-                    except in the case of missing qubits in which case 0 biases are
-                    ignored while a non-zero bias set on a missing qubit raises an
-                    error.
-                J (dict[(int, int): float]):
-                    Quadratic biases of the Ising model.
-                **kwargs:
-                    Optional keyword arguments for the sampling method in D-Wave format
-            Returns:
-                :class:`dimod.SampleSet`: A `dimod` :obj:`~dimod.SampleSet` object.
-            Examples:
-                This example submits a two-variable Ising problem mapped directly to qubits
-                0 and 1.
 
-                >>> from braket.ocean_plugin import BraketDWaveSampler
-                >>> sampler = BraketDWaveSampler(s3_destination_folder)
-                >>> sampleset = sampler.sample_ising({0: -1, 1: 1}, {}, answer_mode="HISTOGRAM")
-                >>> for sample in sampleset.samples():
-                ...    print(sample)
-                ...
-                {0: 1, 1: -1}
+        Args:
+            h (dict/list):
+                Linear biases of the Ising model. If a dict, should be of the
+                form `{v: bias, ...}` where `v` is a spin-valued variable and
+                `bias` is its associated bias. If a list, it is treated as a
+                list of biases where the indices are the variable labels,
+                except in the case of missing qubits in which case 0 biases are
+                ignored while a non-zero bias set on a missing qubit raises an
+                error.
+            J (dict[(int, int): float]):
+                Quadratic biases of the Ising model.
+            **kwargs:
+                Optional keyword arguments for the sampling method in D-Wave format
+
+        Returns:
+            :class:`dimod.SampleSet`: A `dimod` :obj:`~dimod.SampleSet` object.
+
+        Examples:
+            This example submits a two-variable Ising problem mapped directly to qubits
+            0 and 1.
+
+            >>> from braket.ocean_plugin import BraketDWaveSampler
+            >>> sampler = BraketDWaveSampler(s3_destination_folder)
+            >>> sampleset = sampler.sample_ising({0: -1, 1: 1}, {}, answer_mode="HISTOGRAM")
+            >>> for sample in sampleset.samples():
+            ...    print(sample)
+            ...
+            {0: 1, 1: -1}
         """
         return super().sample_ising(h, J, **kwargs)
+
+    def sample_ising_quantum_task(
+        self, h: Union[Dict[int, int], List[int]], J: Dict[int, int], **kwargs
+    ) -> QuantumTask:
+        """
+        Sample from the specified Ising model and return a `QuantumTask`. This has the same inputs
+        as `BraketDWaveSampler.sample_qubo`.
+
+        Args:
+            h (dict/list):
+                Linear biases of the Ising model. If a dict, should be of the
+                form `{v: bias, ...}` where `v` is a spin-valued variable and
+                `bias` is its associated bias. If a list, it is treated as a
+                list of biases where the indices are the variable labels,
+                except in the case of missing qubits in which case 0 biases are
+                ignored while a non-zero bias set on a missing qubit raises an
+                error.
+            J (dict[(int, int): float]):
+                Quadratic biases of the Ising model.
+            **kwargs:
+                Optional keyword arguments for the sampling method in D-Wave format
+
+        Returns:
+            :class:`dimod.SampleSet`: A `dimod` :obj:`~dimod.SampleSet` object.
+
+        Examples:
+            This example submits a two-variable Ising problem mapped directly to qubits
+            0 and 1.
+
+            >>> from braket.ocean_plugin import BraketDWaveSampler
+            >>> sampler = BraketDWaveSampler(s3_destination_folder)
+            >>> task = sampler.sample_ising_quantum_task({0: -1}, {}, answer_mode="HISTOGRAM")
+            >>> sampleset = BraketDWaveSampler.get_task_sample_set(task)
+            >>> for sample in sampleset.samples():
+            ...    print(sample)
+            ...
+            {0: 1, 1: -1}
+        """
+        return super().sample_ising_quantum_task(h, J, **kwargs)
 
     def sample_qubo(self, Q: Dict[Tuple[int, int], int], **kwargs) -> SampleSet:
         """
         Sample from the specified QUBO.
-            Args:
-                Q (dict):
-                    Coefficients of a quadratic unconstrained binary optimization (QUBO) model.
-                **kwargs:
-                    Optional keyword arguments for the sampling method in D-Wave format
-            Returns:
-                :class:`dimod.SampleSet`: A `dimod` :obj:`~dimod.SampleSet` object.
-            Examples:
-                This example submits a two-variable QUBO mapped directly to qubits
-                0 and 4 on a sampler
 
-                >>> from braket.ocean_plugin import BraketDWaveSampler
-                >>> sampler = BraketDWaveSampler(s3_destination_folder)
-                >>> Q = {(0, 0): -1, (4, 4): -1, (0, 4): 2}
-                >>> sampleset = sampler.sample_qubo(Q, postprocess="SAMPLING", num_reads=100)
-                >>> for sample in sampleset.samples():
-                ...    print(sample)
-                ...
-                {0: 1, 1: -1}
+        Args:
+            Q (dict):
+                Coefficients of a quadratic unconstrained binary optimization (QUBO) model.
+            **kwargs:
+                Optional keyword arguments for the sampling method in D-Wave format
+
+        Returns:
+            :class:`dimod.SampleSet`: A `dimod` :obj:`~dimod.SampleSet` object.
+
+        Examples:
+            This example submits a two-variable QUBO mapped directly to qubits
+            0 and 4 on a sampler
+
+            >>> from braket.ocean_plugin import BraketDWaveSampler
+            >>> sampler = BraketDWaveSampler(s3_destination_folder)
+            >>> Q = {(0, 0): -1, (4, 4): -1, (0, 4): 2}
+            >>> sampleset = sampler.sample_qubo(Q, postprocess="SAMPLING", num_reads=100)
+            >>> for sample in sampleset.samples():
+            ...    print(sample)
+            ...
+            {0: 1, 1: -1}
         """
         return super().sample_qubo(Q, **kwargs)
+
+    def sample_qubo_quantum_task(self, Q: Dict[Tuple[int, int], int], **kwargs) -> QuantumTask:
+        """
+        Sample from the specified QUBO and return a `QuantumTask`. This has the same inputs
+        as `BraketDWaveSampler.sample_qubo`.
+
+        Args:
+            Q (dict):
+                Coefficients of a quadratic unconstrained binary optimization (QUBO) model.
+            **kwargs:
+                Optional keyword arguments for the sampling method in D-Wave format
+
+        Returns:
+            :class:`dimod.SampleSet`: A `dimod` :obj:`~dimod.SampleSet` object.
+
+        Examples:
+            This example submits a two-variable QUBO mapped directly to qubits
+            0 and 4 on a sampler
+
+            >>> from braket.ocean_plugin import BraketDWaveSampler
+            >>> sampler = BraketDWaveSampler(s3_destination_folder)
+            >>> Q = {(0, 0): -1, (4, 4): -1, (0, 4): 2}
+            >>> task = sampler.sample_qubo_quantum_task(Q, postprocess="SAMPLING", num_reads=100)
+            >>> sampleset = BraketDWaveSampler.get_task_sample_set(task)
+            >>> for sample in sampleset.samples():
+            ...    print(sample)
+            ...
+            {0: 1, 1: -1}
+        """
+        return super().sample_qubo_quantum_task(Q, **kwargs)
 
     def _process_solver_kwargs(self, **kwargs) -> Dict[str, Any]:
         """
