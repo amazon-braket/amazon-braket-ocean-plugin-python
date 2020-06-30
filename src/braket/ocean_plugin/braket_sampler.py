@@ -1,6 +1,7 @@
 # Copyright 2019-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 #
-# Licensed under the Apache License, Version 2.0 (the "License"). You
+# Licensed under the Apache License, Version 2.0 (the "License"
+# ). You
 # may not use this file except in compliance with the License. A copy of
 # the License is located at
 #
@@ -24,7 +25,7 @@ from braket.aws import AwsQpu, AwsQuantumTask, AwsSession
 from braket.ocean_plugin.braket_sampler_arns import get_arn_to_enum_name_mapping
 from braket.ocean_plugin.braket_solver_metadata import BraketSolverMetadata
 from braket.ocean_plugin.exceptions import InvalidSolverDeviceArn
-from braket.tasks import AnnealingQuantumTaskResult
+from braket.tasks import AnnealingQuantumTaskResult, QuantumTask
 from dimod import BINARY, SPIN, Sampler, SampleSet, Structured
 from dimod.exceptions import BinaryQuadraticModelStructureError
 
@@ -122,6 +123,7 @@ class BraketSampler(Sampler, Structured):
     ) -> SampleSet:
         """
         Sample from the specified Ising model.
+
         Args:
             h (dict/list):
                 Linear biases of the Ising model. If a dict, should be of the
@@ -135,17 +137,71 @@ class BraketSampler(Sampler, Structured):
                 Quadratic biases of the Ising model.
             **kwargs:
                 Optional keyword arguments for the sampling method in Braket boto3 format
+
         Returns:
             :class:`dimod.SampleSet`: A `dimod` :obj:`~dimod.SampleSet` object.
+
         Raises:
             BinaryQuadraticModelStructureError: If problem graph is incompatible with solver
             ValueError: If keyword argument is unsupported by solver
+
         Examples:
             This example submits a two-variable Ising problem mapped directly to qubits
             0 and 1.
+
             >>> from braket.ocean_plugin import BraketSampler
             >>> sampler = BraketSampler(s3_destination_folder, BraketSamplerArns.DWAVE)
             >>> sampleset = sampler.sample_ising({0: -1, 1: 1}, {}, resultFormat="HISTOGRAM")
+            >>> for sample in sampleset.samples():
+            ...    print(sample)
+            ...
+            {0: 1, 1: -1}
+        """
+
+        if isinstance(h, list):
+            h = dict((v, b) for v, b in enumerate(h) if b or v in self.nodelist)
+
+        aws_task = self.sample_ising_quantum_task(h, J, **kwargs)
+        variables = set(h).union(*J)
+
+        return BraketSampler.get_task_sample_set(aws_task, variables)
+
+    def sample_ising_quantum_task(
+        self, h: Union[Dict[int, int], List[int]], J: Dict[int, int], **kwargs
+    ) -> QuantumTask:
+        """
+        Sample from the specified Ising model and return a `QuantumTask`. This has the same inputs
+        as `BraketSampler.sample_ising`.
+
+        Args:
+            h (dict/list):
+                Linear biases of the Ising model. If a dict, should be of the
+                form `{v: bias, ...}` where `v` is a spin-valued variable and
+                `bias` is its associated bias. If a list, it is treated as a
+                list of biases where the indices are the variable labels,
+                except in the case of missing qubits in which case 0 biases are
+                ignored while a non-zero bias set on a missing qubit raises an
+                error.
+            J (dict[(int, int): float]):
+                Quadratic biases of the Ising model.
+            **kwargs:
+                Optional keyword arguments for the sampling method in Braket boto3 format
+
+        Returns:
+            :class:`dimod.SampleSet`: A `dimod` :obj:`~dimod.SampleSet` object.
+
+        Raises:
+            BinaryQuadraticModelStructureError: If problem graph is incompatible with solver
+            ValueError: If keyword argument is unsupported by solver
+
+        Examples:
+            This example submits a two-variable Ising problem mapped directly to qubits
+            0 and 1.
+
+            >>> from braket.ocean_plugin import BraketSampler
+            >>> sampler = BraketSampler(s3_destination_folder, BraketSamplerArns.DWAVE)
+            >>> task = sampler.sample_ising_quantum_task({0: -1}, {}, resultFormat="HISTOGRAM")
+            >>> sampleset = BraketSampler.get_task_sample_set(task)
             >>> for sample in sampleset.samples():
             ...    print(sample)
             ...
@@ -163,37 +219,74 @@ class BraketSampler(Sampler, Structured):
         ):
             raise BinaryQuadraticModelStructureError("Problem graph incompatible with solver.")
 
-        aws_task = self.solver.run(
+        return self.solver.run(
             Problem(ProblemType.ISING, h, J),
             self._s3_destination_folder,
             logger=self._logger,
             **solver_kwargs,
         )
 
-        variables = set(h).union(*J)
-
-        return BraketSampler.get_task_sample_set(aws_task, variables)
-
     def sample_qubo(self, Q: Dict[Tuple[int, int], int], **kwargs) -> SampleSet:
         """
         Sample from the specified QUBO.
+
         Args:
             Q (dict):
                 Coefficients of a quadratic unconstrained binary optimization (QUBO) model.
             **kwargs:
                 Optional keyword arguments for the sampling method in Braket boto3 format
+
         Returns:
             :class:`dimod.SampleSet`: A `dimod` :obj:`~dimod.SampleSet` object.
+
         Raises:
             BinaryQuadraticModelStructureError: If problem graph is incompatible with solver
             ValueError: If keyword argument is unsupported by solver
+
         Examples:
             This example submits a two-variable QUBO mapped directly to qubits
             0 and 4 on a sampler
+
             >>> from braket.ocean_plugin import BraketSampler
             >>> sampler = BraketSampler(s3_destination_folder, BraketSamplerArns.DWAVE)
             >>> Q = {(0, 0): -1, (4, 4): -1, (0, 4): 2}
             >>> sampleset = sampler.sample_qubo(Q, postprocessingType="SAMPLING", shots=100)
+            >>> for sample in sampleset.samples():
+            ...    print(sample)
+            ...
+            {0: 1, 1: -1}
+        """
+        aws_task = self.sample_qubo_quantum_task(Q, **kwargs)
+        variables = set().union(*Q)
+        return BraketSampler.get_task_sample_set(aws_task, variables)
+
+    def sample_qubo_quantum_task(self, Q: Dict[Tuple[int, int], int], **kwargs) -> QuantumTask:
+        """
+        Sample from the specified QUBO and return a `QuantumTask`. This has the same inputs
+        as `BraketSampler.sample_qubo`
+
+        Args:
+            Q (dict):
+                Coefficients of a quadratic unconstrained binary optimization (QUBO) model.
+            **kwargs:
+                Optional keyword arguments for the sampling method in Braket boto3 format
+
+        Returns:
+            :class:`dimod.SampleSet`: A `dimod` :obj:`~dimod.SampleSet` object.
+
+        Raises:
+            BinaryQuadraticModelStructureError: If problem graph is incompatible with solver
+            ValueError: If keyword argument is unsupported by solver
+
+        Examples:
+            This example submits a two-variable QUBO mapped directly to qubits
+            0 and 4 on a sampler
+
+            >>> from braket.ocean_plugin import BraketSampler
+            >>> sampler = BraketSampler(s3_destination_folder, BraketSamplerArns.DWAVE)
+            >>> Q = {(0, 0): -1, (4, 4): -1, (0, 4): 2}
+            >>> task = sampler.sample_qubo_quantum_task(Q, resultFormat="HISTOGRAM", shots=100)
+            >>> sampleset = BraketSampler.get_task_sample_set(task)
             >>> for sample in sampleset.samples():
             ...    print(sample)
             ...
@@ -215,16 +308,12 @@ class BraketSampler(Sampler, Structured):
             else:
                 quadratic[(u, v)] = bias
 
-        aws_task = self.solver.run(
+        return self.solver.run(
             Problem(ProblemType.QUBO, linear, quadratic),
             self._s3_destination_folder,
             logger=self._logger,
             **solver_kwargs,
         )
-
-        variables = set().union(*Q)
-
-        return BraketSampler.get_task_sample_set(aws_task, variables)
 
     @staticmethod
     def get_task_sample_set(task: AwsQuantumTask, variables: Set[int] = None) -> SampleSet:
