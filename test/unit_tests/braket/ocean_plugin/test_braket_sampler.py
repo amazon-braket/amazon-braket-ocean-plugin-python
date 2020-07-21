@@ -178,7 +178,6 @@ def test_get_task_sample_active_variables(s3_qubo_result,):
 def test_get_task_sample_no_active_variables(s3_qubo_result,):
     s3_dict = json.loads(s3_qubo_result)
     del s3_dict["additionalMetadata"]["dwaveMetadata"]
-    print(s3_dict)
     task = Mock()
     task.result.return_value = AnnealingQuantumTaskResult.from_string(json.dumps(s3_dict))
     actual = BraketSampler.get_task_sample_set(task)
