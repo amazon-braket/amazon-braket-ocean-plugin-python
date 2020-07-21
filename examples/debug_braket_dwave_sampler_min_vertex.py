@@ -15,8 +15,9 @@ import logging
 
 import dwave_networkx as dnx
 import networkx as nx
-from braket.ocean_plugin import BraketDWaveSampler, BraketSamplerArns
 from dwave.system.composites import EmbeddingComposite
+
+from braket.ocean_plugin import BraketDWaveSampler, BraketSamplerArns
 
 logger = logging.getLogger("newLogger")  # create new logger
 logger.addHandler(

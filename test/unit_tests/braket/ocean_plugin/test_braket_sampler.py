@@ -17,13 +17,6 @@ from unittest.mock import Mock, patch
 
 import pytest
 from boltons.dictutils import FrozenDict
-from braket.ocean_plugin import (
-    BraketSampler,
-    BraketSamplerArns,
-    BraketSolverMetadata,
-    InvalidSolverDeviceArn,
-)
-from braket.tasks import AnnealingQuantumTaskResult
 from conftest import (
     sample_ising_common_testing,
     sample_ising_quantum_task_common_testing,
@@ -31,6 +24,14 @@ from conftest import (
     sample_qubo_quantum_task_common_testing,
 )
 from dimod.exceptions import BinaryQuadraticModelStructureError
+
+from braket.ocean_plugin import (
+    BraketSampler,
+    BraketSamplerArns,
+    BraketSolverMetadata,
+    InvalidSolverDeviceArn,
+)
+from braket.tasks import AnnealingQuantumTaskResult
 
 
 @pytest.fixture

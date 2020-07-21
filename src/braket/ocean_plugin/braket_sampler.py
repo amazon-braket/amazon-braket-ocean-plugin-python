@@ -20,14 +20,15 @@ from logging import Logger, getLogger
 from typing import Any, Dict, FrozenSet, List, Set, Tuple, Union
 
 from boltons.dictutils import FrozenDict
+from dimod import BINARY, SPIN, Sampler, SampleSet, Structured
+from dimod.exceptions import BinaryQuadraticModelStructureError
+
 from braket.annealing.problem import Problem, ProblemType
 from braket.aws import AwsQpu, AwsQuantumTask, AwsSession
 from braket.ocean_plugin.braket_sampler_arns import get_arn_to_enum_name_mapping
 from braket.ocean_plugin.braket_solver_metadata import BraketSolverMetadata
 from braket.ocean_plugin.exceptions import InvalidSolverDeviceArn
 from braket.tasks import AnnealingQuantumTaskResult, QuantumTask
-from dimod import BINARY, SPIN, Sampler, SampleSet, Structured
-from dimod.exceptions import BinaryQuadraticModelStructureError
 
 
 class BraketSampler(Sampler, Structured):

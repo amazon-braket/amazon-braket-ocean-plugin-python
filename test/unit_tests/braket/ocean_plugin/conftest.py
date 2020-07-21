@@ -16,10 +16,11 @@ import logging
 from unittest.mock import Mock
 
 import pytest
+from dimod import BINARY, SPIN, SampleSet
+
 from braket.annealing.problem import Problem, ProblemType
 from braket.ocean_plugin import BraketSampler, BraketSamplerArns
 from braket.tasks import AnnealingQuantumTaskResult
-from dimod import BINARY, SPIN, SampleSet
 
 
 @pytest.fixture
