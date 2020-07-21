@@ -19,8 +19,13 @@ import pytest
 from dimod import BINARY, SPIN, SampleSet
 
 from braket.annealing.problem import Problem, ProblemType
-from braket.ocean_plugin import BraketSampler, BraketSamplerArns
+from braket.ocean_plugin import BraketSamplerArns
 from braket.tasks import AnnealingQuantumTaskResult
+
+
+@pytest.fixture
+def shots():
+    return 100
 
 
 @pytest.fixture
@@ -55,70 +60,46 @@ def braket_sampler_properties():
 @pytest.fixture()
 def additional_metadata():
     return {
-        "DWaveMetadata": {
-            "ActiveVariables": [0],
-            "Timing": {
-                "QpuSamplingTime": 1575,
-                "QpuAnnealTimePerSample": 20,
-                "QpuReadoutTimePerSample": 274,
-                "QpuAccessTime": 10917,
-                "QpuAccessOverheadTime": 3382,
-                "QpuProgrammingTime": 9342,
-                "QpuDelayTimePerSample": 21,
-                "TotalPostProcessingTime": 117,
-                "PostProcessingOverheadTime": 117,
-                "TotalRealTime": 10917,
-                "RunTimeChip": 1575,
-                "AnnealTimePerRun": 20,
-                "ReadoutTimePerRun": 274,
+        "additionalMetadata": {
+            "action": {
+                "type": "ISING",
+                "linear": {"0": 0.3333, "1": -0.333, "4": -0.333, "5": 0.333},
+                "quadratic": {"0,4": 0.667, "0,5": -1.0, "1,4": 0.667, "1,5": 0.667},
+            },
+            "dwaveMetadata": {
+                "activeVariables": [0],
+                "timing": {
+                    "qpuSamplingTime": 100,
+                    "qpuAnnealTimePerSample": 20,
+                    "qpuAccessTime": 10917,
+                    "qpuAccessOverheadTime": 3382,
+                    "qpuReadoutTimePerSample": 274,
+                    "qpuProgrammingTime": 9342,
+                    "qpuDelayTimePerSample": 21,
+                    "postProcessingOverheadTime": 117,
+                    "totalPostProcessingTime": 117,
+                    "totalRealTime": 10917,
+                    "runTimeChip": 1575,
+                    "annealTimePerRun": 20,
+                    "readoutTimePerRun": 274,
+                },
             },
         }
     }
 
 
 @pytest.fixture
-def task_metadata():
-    return {
-        "TaskMetadata": {
-            "Id": "UUID_blah_1",
-            "Status": "COMPLETED",
-            "BackendArn": BraketSamplerArns.DWAVE,
-            "Shots": 5,
-        }
-    }
+def task_metadata(shots):
+    return {"taskMetadata": {"id": "task_arn", "shots": shots, "deviceId": BraketSamplerArns.DWAVE}}
 
 
 @pytest.fixture
 def result(additional_metadata, task_metadata):
     result = {
-        "Solutions": [[-1, -1, -1], [1, -1, 1], [1, -1, -1]],
-        "VariableCount": 2,
-        "Values": [0.0, 1.0, 2.0],
-        "SolutionCounts": None,
-        "DWaveMetadata": {
-            "ActiveVariables": [0],
-            "Timing": {
-                "QpuSamplingTime": 1575,
-                "QpuAnnealTimePerSample": 20,
-                "QpuReadoutTimePerSample": 274,
-                "QpuAccessTime": 10917,
-                "QpuAccessOverheadTime": 3382,
-                "QpuProgrammingTime": 9342,
-                "QpuDelayTimePerSample": 21,
-                "TotalPostProcessingTime": 117,
-                "PostProcessingOverheadTime": 117,
-                "TotalRealTime": 10917,
-                "RunTimeChip": 1575,
-                "AnnealTimePerRun": 20,
-                "ReadoutTimePerRun": 274,
-            },
-        },
-        "TaskMetadata": {
-            "Id": "UUID_blah_1",
-            "Status": "COMPLETED",
-            "BackendArn": BraketSamplerArns.DWAVE,
-            "Shots": 5,
-        },
+        "solutions": [[-1, -1, -1, -1], [1, -1, 1, 1], [1, -1, -1, 1]],
+        "solutionCounts": [3, 2, 4],
+        "values": [0.0, 1.0, 2.0],
+        "variableCount": 2,
     }
     result.update(additional_metadata)
     result.update(task_metadata)
@@ -127,19 +108,13 @@ def result(additional_metadata, task_metadata):
 
 @pytest.fixture
 def s3_ising_result(result):
-    result.update({"ProblemType": BraketSampler.ISING_PROBLEM_TYPE})
+    result["additionalMetadata"]["action"]["type"] = ProblemType.ISING
     return json.dumps(result)
 
 
 @pytest.fixture
 def s3_qubo_result(result):
-    result.update({"ProblemType": BraketSampler.QUBO_PROBLEM_TYPE})
-    return json.dumps(result)
-
-
-@pytest.fixture
-def s3_unknown_result(result):
-    result.update({"ProblemType": "unknown"})
+    result["additionalMetadata"]["action"]["type"] = ProblemType.QUBO
     return json.dumps(result)
 
 
@@ -149,15 +124,13 @@ def s3_destination_folder():
 
 
 @pytest.fixture
-def shots():
-    return 100
-
-
-@pytest.fixture
-def info(additional_metadata, task_metadata):
+def info(result):
+    result = AnnealingQuantumTaskResult.from_string(json.dumps(result))
+    additional_metadata = result.additional_metadata.dict()
+    task_metadata = result.task_metadata.dict()
     info = {}
-    info.update({"AdditionalMetadata": additional_metadata})
-    info.update(task_metadata)
+    info.update({"additionalMetadata": additional_metadata})
+    info.update({"taskMetadata": task_metadata})
     return info
 
 

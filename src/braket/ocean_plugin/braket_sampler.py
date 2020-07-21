@@ -24,7 +24,7 @@ from dimod import BINARY, SPIN, Sampler, SampleSet, Structured
 from dimod.exceptions import BinaryQuadraticModelStructureError
 
 from braket.annealing.problem import Problem, ProblemType
-from braket.aws import AwsQpu, AwsQuantumTask, AwsSession
+from braket.aws import AwsQpu, AwsSession
 from braket.ocean_plugin.braket_sampler_arns import get_arn_to_enum_name_mapping
 from braket.ocean_plugin.braket_solver_metadata import BraketSolverMetadata
 from braket.ocean_plugin.exceptions import InvalidSolverDeviceArn
@@ -51,9 +51,6 @@ class BraketSampler(Sampler, Structured):
         >>> s3_destination_folder = ('test_bucket', 'test_folder')
         >>> sampler = BraketSampler(s3_destination_folder, BraketSamplerArns.DWAVE)
     """
-
-    ISING_PROBLEM_TYPE = "ising"
-    QUBO_PROBLEM_TYPE = "qubo"
 
     def __init__(
         self,
@@ -317,12 +314,12 @@ class BraketSampler(Sampler, Structured):
         )
 
     @staticmethod
-    def get_task_sample_set(task: AwsQuantumTask, variables: Set[int] = None) -> SampleSet:
+    def get_task_sample_set(task: QuantumTask, variables: Set[int] = None) -> SampleSet:
         """
-        Get SampleSet from an `AwsQuantumTask` object
+        Get SampleSet from an `QuantumTask` object
 
         Args:
-            task (AwsQuantumTask): task from which to get `SampleSet`
+            task (QuantumTask): task from which to get `SampleSet`
             variables (Set[int], optional): variables for samples in `SampleSet`.
                 The default is the set of active variables for D-Wave.
                 If there are no active variables marked as part of the task result,
@@ -392,8 +389,8 @@ class BraketSampler(Sampler, Structured):
             energy = result.record_array.value
             num_occurrences = result.record_array.solution_count
             info = {
-                "TaskMetadata": result.task_metadata,
-                "AdditionalMetadata": result.additional_metadata,
+                "taskMetadata": result.task_metadata.dict(),
+                "additionalMetadata": result.additional_metadata.dict(),
             }
             vartype = BraketSampler._vartype_from_problem_type(result.problem_type)
             return SampleSet.from_samples(
@@ -413,16 +410,14 @@ class BraketSampler(Sampler, Structured):
     ) -> FrozenSet[int]:
         if variables:
             return frozenset(variables)
-        additional_metadata = result.additional_metadata.get("DWaveMetadata", {})
-        if "ActiveVariables" in additional_metadata:
-            return frozenset(additional_metadata.get("ActiveVariables"))
+        dwave_metadata = result.additional_metadata.dwaveMetadata
+        if dwave_metadata and dwave_metadata.activeVariables:
+            return frozenset(dwave_metadata.activeVariables)
         return frozenset(list(range(result.variable_count)))
 
     @staticmethod
     def _vartype_from_problem_type(problem_type: str) -> Union[SPIN, BINARY]:
-        if problem_type == BraketSampler.QUBO_PROBLEM_TYPE:
+        if problem_type == ProblemType.QUBO:
             return BINARY
-        elif problem_type == BraketSampler.ISING_PROBLEM_TYPE:
-            return SPIN
         else:
-            raise ValueError(f"Unknown problem type {problem_type}")
+            return SPIN
