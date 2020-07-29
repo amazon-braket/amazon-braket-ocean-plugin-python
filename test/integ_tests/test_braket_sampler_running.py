@@ -12,9 +12,10 @@
 # language governing permissions and limitations under the License.
 
 import minorminer
-from braket.ocean_plugin import BraketSampler, BraketSamplerArns
 from conftest import to_base_ten
 from dwave.embedding import embed_bqm, unembed_sampleset
+
+from braket.ocean_plugin import BraketSampler, BraketSamplerArns
 
 
 def test_factoring_minorminer(aws_session, s3_destination_folder, factoring_bqm, integer_to_factor):

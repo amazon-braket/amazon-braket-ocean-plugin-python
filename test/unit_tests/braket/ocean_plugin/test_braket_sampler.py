@@ -17,13 +17,6 @@ from unittest.mock import Mock, patch
 
 import pytest
 from boltons.dictutils import FrozenDict
-from braket.ocean_plugin import (
-    BraketSampler,
-    BraketSamplerArns,
-    BraketSolverMetadata,
-    InvalidSolverDeviceArn,
-)
-from braket.tasks import AnnealingQuantumTaskResult
 from conftest import (
     sample_ising_common_testing,
     sample_ising_quantum_task_common_testing,
@@ -31,6 +24,14 @@ from conftest import (
     sample_qubo_quantum_task_common_testing,
 )
 from dimod.exceptions import BinaryQuadraticModelStructureError
+
+from braket.ocean_plugin import (
+    BraketSampler,
+    BraketSamplerArns,
+    BraketSolverMetadata,
+    InvalidSolverDeviceArn,
+)
+from braket.tasks import AnnealingQuantumTaskResult
 
 
 @pytest.fixture
@@ -160,14 +161,6 @@ def test_sample_qubo_value_error(braket_sampler):
     braket_sampler.sample_qubo({(0, 0): 0}, unsupported="hi")
 
 
-@pytest.mark.xfail(raises=ValueError)
-def test_get_task_sample_set_unknown_problem_type(s3_unknown_result,):
-    task = Mock()
-    task.result.return_value = AnnealingQuantumTaskResult.from_string(s3_unknown_result)
-    actual = BraketSampler.get_task_sample_set(task)
-    actual.first
-
-
 def test_get_task_sample_set_variables(s3_qubo_result,):
     task = Mock()
     task.result.return_value = AnnealingQuantumTaskResult.from_string(s3_qubo_result)
@@ -184,9 +177,9 @@ def test_get_task_sample_active_variables(s3_qubo_result,):
 
 def test_get_task_sample_no_active_variables(s3_qubo_result,):
     s3_dict = json.loads(s3_qubo_result)
-    del s3_dict["DWaveMetadata"]["ActiveVariables"]
+    del s3_dict["additionalMetadata"]["dwaveMetadata"]
     task = Mock()
-    task.result.return_value = AnnealingQuantumTaskResult.from_dict(s3_dict)
+    task.result.return_value = AnnealingQuantumTaskResult.from_string(json.dumps(s3_dict))
     actual = BraketSampler.get_task_sample_set(task)
     assert list(actual.variables) == [0, 1]
 
@@ -213,7 +206,7 @@ def test_sample_qubo_dict_success(
     )
 
 
-def test_sample_qubo_quantum_task_dict_success(
+def test_sample_qubo_quasntum_task_dict_success(
     braket_sampler,
     s3_qubo_result,
     s3_destination_folder,

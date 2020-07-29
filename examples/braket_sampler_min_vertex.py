@@ -13,8 +13,9 @@
 
 import dwave_networkx as dnx
 import networkx as nx
-from braket.ocean_plugin import BraketSampler, BraketSamplerArns
 from dwave.system.composites import EmbeddingComposite
+
+from braket.ocean_plugin import BraketSampler, BraketSamplerArns
 
 s3_destination_folder = ("your-s3-bucket", "your-folder")
 sampler = BraketSampler(s3_destination_folder, BraketSamplerArns.DWAVE)

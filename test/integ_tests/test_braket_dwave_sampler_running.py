@@ -11,9 +11,10 @@
 # ANY KIND, either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
 
-from braket.ocean_plugin import BraketDWaveSampler, BraketSamplerArns
 from conftest import to_base_ten
 from dwave.system.composites import EmbeddingComposite
+
+from braket.ocean_plugin import BraketDWaveSampler, BraketSamplerArns
 
 
 def test_factoring_embedded_composite(

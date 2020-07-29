@@ -15,17 +15,18 @@ from unittest.mock import Mock, patch
 
 import pytest
 from boltons.dictutils import FrozenDict
-from braket.ocean_plugin import (
-    BraketDWaveSampler,
-    BraketSampler,
-    BraketSamplerArns,
-    BraketSolverMetadata,
-)
 from conftest import (
     sample_ising_common_testing,
     sample_ising_quantum_task_common_testing,
     sample_qubo_common_testing,
     sample_qubo_quantum_task_common_testing,
+)
+
+from braket.ocean_plugin import (
+    BraketDWaveSampler,
+    BraketSampler,
+    BraketSamplerArns,
+    BraketSolverMetadata,
 )
 
 

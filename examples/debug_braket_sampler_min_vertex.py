@@ -16,8 +16,9 @@ import sys
 
 import dwave_networkx as dnx
 import networkx as nx
-from braket.ocean_plugin import BraketSampler, BraketSamplerArns
 from dwave.system.composites import EmbeddingComposite
+
+from braket.ocean_plugin import BraketSampler, BraketSamplerArns
 
 logger = logging.getLogger("newLogger")  # create new logger
 logger.addHandler(logging.StreamHandler(stream=sys.stdout))  # configure to print to sys.stdout

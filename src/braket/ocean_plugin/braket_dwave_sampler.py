@@ -19,12 +19,13 @@ from logging import Logger, getLogger
 from typing import Any, Dict, List, Tuple, Union
 
 from boltons.dictutils import FrozenDict
+from dimod import SampleSet
+
 from braket.aws import AwsSession
 from braket.ocean_plugin.braket_sampler import BraketSampler
 from braket.ocean_plugin.braket_sampler_arns import BraketSamplerArns, get_arn_to_enum_name_mapping
 from braket.ocean_plugin.braket_solver_metadata import BraketSolverMetadata
 from braket.tasks import QuantumTask
-from dimod import SampleSet
 
 
 class BraketDWaveSampler(BraketSampler):
