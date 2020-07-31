@@ -4,7 +4,7 @@
 # You can set these variables from the command line.
 SPHINXOPTS    =
 SPHINXBUILD   = python -msphinx
-SPHINXPROJ    = braket-ocean-plugin
+SPHINXPROJ    = amazon-braket-ocean-plugin
 SOURCEDIR     = .
 BUILDDIR      = ../build/documentation
 

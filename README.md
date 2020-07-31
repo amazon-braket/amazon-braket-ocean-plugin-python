@@ -1,6 +1,6 @@
 **This prerelease documentation is confidential and is provided under the terms of your nondisclosure agreement with Amazon Web Services (AWS) or other agreement governing your receipt of AWS confidential information.**
 
-The Amazon Braket Ocean Plugin is an open source library that provides a framework that you can use to interact with Ocean tools on top of Amazon Braket.
+The Amazon Braket Ocean Plugin is an open source library in Python that provides a framework that you can use to interact with Ocean tools on top of Amazon Braket.
 
 ## Prerequisites
 Before you begin working with the Amazon Braket Ocean Plugin, make sure that you've installed or configured the following prerequisites.
@@ -10,7 +10,7 @@ Download and install Python 3.7.2 or greater from [Python.org](https://www.pytho
 If you are using Windows, choose **Add Python to environment variables** before you begin the installation.
 
 ### Amazon Braket SDK
-Download and install the Amazon Braket SDK. Follow the instructions in the [README](https://github.com/aws/braket-python-sdk/blob/stable/latest/README.md).
+Download and install the Amazon Braket SDK. Follow the instructions in the [README](https://github.com/aws/amazon-braket-sdk-python/blob/main/README.md).
 
 ### Ocean tools
 Download and install [Ocean tools](https://docs.ocean.dwavesys.com/en/latest/overview/install.html).
@@ -25,34 +25,34 @@ Use the steps in this section to install and configure the Amazon Braket Python 
 The easiest way to get the plugin is to download it directly from the GitHub site. Because the repositories are private during the Private Beta period, an SSH key is required to access the files remotely from a terminal session. If you download them directly from the GitHub site, you can just extract the files to your system or virtual environment without the extra steps of using an SSH key. You need to log in to GitHub using the account that was whitelisted for the Amazon Braket (Private Beta).
 
 Use the following links to download the Amazon Braket Ocean Python Plugin:
-- [braket-ocean-python-plugin](https://github.com/aws/braket-ocean-python-plugin/archive/master.zip)
+- [amazon-braket-ocean-plugin-python](https://github.com/aws/amazon-braket-ocean-plugin-python/archive/main.zip)
 
 ### Extract the plugin .zip files
-Because the files were downloaded directly from GitHub, the folder in the .zip file includes the name of the branch of the GitHub repo that was downloaded, in this case the `master` branch. But to use the files in the plugin, we need to rename the folder to the original name. In the repository, master will contain the stable changes for users to download.
+Because the files were downloaded directly from GitHub, the folder in the .zip file includes the name of the branch of the GitHub repo that was downloaded, in this case the `main` branch. But to use the files in the plugin, we need to rename the folder to the original name. In the repository, main will contain the stable changes for users to download.
 
 **To rename the folders in the plugin .zip files**
 First, extract the .zip files to a location of your choosing. Then open the location where you extracted the folders to. You can use either the GUI file system tools in your OS, or the command line. You should see 2 folders with the following names:
-- braket-ocean-python-plugin-master
+- amazon-braket-ocean-plugin-python-main
 
 Rename the folders to the following:
-- braket-ocean-python-plugin
+- amazon-braket-ocean-plugin-python
 
 Then copy the renamed files and paste them into the `braketvirtenv` folder where you created a virtual environment. Your folder structure should look like this:
 ```bash
-..\YourFolder\braketvirtenv\braket-ocean-python-plugin\
+..\YourFolder\braketvirtenv\amazon-braket-ocean-plugin-python\
 ```
 
 ### Install the Amazon Braket Ocean plug-in package
 Use the following commands to install the package:
 
 ```bash
-pip install -e braket-ocean-python-plugin
+pip install -e amazon-braket-ocean-plugin-python
 ```
 
-You can check your currently installed version of `braket-ocean-python-plugin` with `pip show`:
+You can check your currently installed version of `amazon-braket-ocean-plugin` with `pip show`:
 
 ```bash
-pip show braket-ocean-python-plugin
+pip show amazon-braket-ocean-plugin
 ```
 
 or alternatively from within Python:
@@ -110,7 +110,7 @@ Tasks sent to QPUs don't always complete right away. To view task status, you ca
 ## Install Additional Packages for Testing
 Make sure to install test dependencies first:
 ```bash
-pip install -e "braket-ocean-python-plugin[test]"
+pip install -e "amazon-braket-ocean-plugin-python[test]"
 ```
 
 ### Unit Tests
@@ -129,7 +129,7 @@ tox
 ```
 
 ### Integration Tests
-Set the `AWS_PROFILE`, similar to in the braket-python-sdk [README](https://github.com/aws/braket-python-sdk/blob/stable/latest/README.md).
+Set the `AWS_PROFILE`, similar to in the amazon-braket-sdk-python [README](https://github.com/aws/amazon-braket-sdk-python/blob/main/README.md).
 ```bash
 export AWS_PROFILE=Your_Profile_Name
 ```

@@ -17,14 +17,14 @@ with open("src/braket/ocean_plugin/_version.py") as f:
     version = f.readlines()[-1].split()[-1].strip("\"'")
 
 setup(
-    name="braket-ocean-plugin",
+    name="amazon-braket-ocean-plugin",
     version=version,
     license="Apache License 2.0",
     python_requires=">= 3.7",
     packages=find_namespace_packages(where="src", exclude=("test",)),
     package_dir={"": "src"},
     install_requires=[
-        "braket-sdk @ git+https://github.com/aws/braket-python-sdk.git",
+        "amazon-braket-sdk @ git+https://github.com/aws/amazon-braket-sdk-python.git",
         "dimod>=0.8.13",
         "boto3",
         "boltons",
