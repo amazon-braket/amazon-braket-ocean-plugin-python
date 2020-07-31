@@ -24,10 +24,8 @@ from dimod import BINARY, SPIN, Sampler, SampleSet, Structured
 from dimod.exceptions import BinaryQuadraticModelStructureError
 
 from braket.annealing.problem import Problem, ProblemType
-from braket.aws import AwsQpu, AwsSession
-from braket.ocean_plugin.braket_sampler_arns import get_arn_to_enum_name_mapping
+from braket.aws import AwsDevice, AwsSession
 from braket.ocean_plugin.braket_solver_metadata import BraketSolverMetadata
-from braket.ocean_plugin.exceptions import InvalidSolverDeviceArn
 from braket.tasks import AnnealingQuantumTaskResult, QuantumTask
 
 
@@ -43,13 +41,10 @@ class BraketSampler(Sampler, Structured):
         logger (Logger): Python Logger object with which to write logs, such as `QuantumTask`
             statuses while polling for task to complete. Default is `getLogger(__name__)`
 
-    Raises:
-        InvalidSolverDeviceArn: If provided device ARN for solver is unsupported.
-
     Examples:
-        >>> from braket.ocean_plugin import BraketSampler, BraketSamplerArns
+        >>> from braket.ocean_plugin import BraketSampler
         >>> s3_destination_folder = ('test_bucket', 'test_folder')
-        >>> sampler = BraketSampler(s3_destination_folder, BraketSamplerArns.DWAVE)
+        >>> sampler = BraketSampler(s3_destination_folder, "device_arn_1")
     """
 
     def __init__(
@@ -60,13 +55,10 @@ class BraketSampler(Sampler, Structured):
         logger: Logger = getLogger(__name__),
     ):
         self._s3_destination_folder = s3_destination_folder
-
-        if device_arn not in get_arn_to_enum_name_mapping():
-            raise InvalidSolverDeviceArn(f"Invalid device ARN {device_arn}")
         self._device_arn = device_arn
         self._logger = logger
 
-        self.solver = AwsQpu(device_arn, aws_session)
+        self.solver = AwsDevice(device_arn, aws_session)
 
     @property
     @lru_cache(maxsize=1)
@@ -94,11 +86,12 @@ class BraketSampler(Sampler, Structured):
         Solver parameters are dependent on the selected solver and subject to change;
         for example, new released features may add parameters.
         """
-        enum_name = get_arn_to_enum_name_mapping()[self._device_arn]
         return FrozenDict(
             {
                 param: ["parameters"]
-                for param in BraketSolverMetadata[enum_name]["parameters"].values()
+                for param in BraketSolverMetadata.get_metadata_by_arn(self._device_arn)[
+                    "parameters"
+                ].values()
             }
         )
 
@@ -370,9 +363,10 @@ class BraketSampler(Sampler, Structured):
         Return:
             Dict[str, Any]: a dict of kwargs to the solver
         """
-        enum_name = get_arn_to_enum_name_mapping()[self._device_arn]
-        key_name = BraketSolverMetadata[enum_name]["backend_parameters_key_name"]
-        solver_kwargs = {"backend_parameters": {key_name: kwargs}}
+        key_name = BraketSolverMetadata.get_metadata_by_arn(self._device_arn)[
+            "device_parameters_key_name"
+        ]
+        solver_kwargs = {"device_parameters": {key_name: kwargs}}
         if "shots" in kwargs:
             shots = kwargs["shots"]
             del kwargs["shots"]

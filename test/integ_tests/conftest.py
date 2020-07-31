@@ -21,6 +21,11 @@ from botocore.exceptions import ClientError
 from braket.aws.aws_session import AwsSession
 
 
+@pytest.fixture
+def dwave_arn():
+    return "arn:aws:braket:::device/qpu/d-wave/DW_2000Q_6"
+
+
 @pytest.fixture(scope="session")
 def boto_session():
     profile_name = os.environ["AWS_PROFILE"]

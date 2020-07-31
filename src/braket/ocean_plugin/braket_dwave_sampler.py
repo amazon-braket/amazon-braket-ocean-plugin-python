@@ -23,7 +23,6 @@ from dimod import SampleSet
 
 from braket.aws import AwsSession
 from braket.ocean_plugin.braket_sampler import BraketSampler
-from braket.ocean_plugin.braket_sampler_arns import BraketSamplerArns, get_arn_to_enum_name_mapping
 from braket.ocean_plugin.braket_solver_metadata import BraketSolverMetadata
 from braket.tasks import QuantumTask
 
@@ -35,7 +34,7 @@ class BraketDWaveSampler(BraketSampler):
     Args:
         s3_destination_folder (AwsSession.S3DestinationFolder): NamedTuple with bucket (index 0)
             and key (index 1) that is the results destination folder in S3.
-        device_arn (str): AWS quantum device arn. Default is D-Wave.
+        device_arn (str): AWS quantum device arn. Default is the latest D-Wave QPU device ARN.
         aws_session (AwsSession): AwsSession to call AWS with.
         logger (Logger): Python Logger object with which to write logs, such as `QuantumTask`
             statuses while polling for task to complete. Default is `getLogger(__name__)`
@@ -49,10 +48,14 @@ class BraketDWaveSampler(BraketSampler):
     def __init__(
         self,
         s3_destination_folder: AwsSession.S3DestinationFolder,
-        device_arn: str = BraketSamplerArns.DWAVE,
+        device_arn: str = None,
         aws_session: AwsSession = None,
         logger: Logger = getLogger(__name__),
     ):
+        if not device_arn:
+            # TODO: replace with call to programmatically use the API to get this
+            # once the API is ready
+            device_arn = "arn:aws:braket:::device/qpu/d-wave/DW_2000Q_6"
         super().__init__(s3_destination_folder, device_arn, aws_session, logger)
 
     @property
@@ -67,12 +70,11 @@ class BraketDWaveSampler(BraketSampler):
         Solver properties are dependent on the selected solver and subject to change;
         for example, new released features may add properties.
         """
-        enum_name = get_arn_to_enum_name_mapping()[self._device_arn]
         return FrozenDict(
             {
-                BraketSolverMetadata[enum_name]["properties"][braket_key]: copy.deepcopy(
-                    self.solver.properties[braket_key]
-                )
+                BraketSolverMetadata.get_metadata_by_arn(self._device_arn)["properties"][
+                    braket_key
+                ]: copy.deepcopy(self.solver.properties[braket_key])
                 for braket_key in self.solver.properties
             }
         )
@@ -91,9 +93,13 @@ class BraketDWaveSampler(BraketSampler):
         Solver parameters are dependent on the selected solver and subject to change;
         for example, new released features may add parameters.
         """
-        enum_name = get_arn_to_enum_name_mapping()[self._device_arn]
         return FrozenDict(
-            {param: ["parameters"] for param in BraketSolverMetadata[enum_name]["parameters"]}
+            {
+                param: ["parameters"]
+                for param in BraketSolverMetadata.get_metadata_by_arn(self._device_arn)[
+                    "parameters"
+                ]
+            }
         )
 
     def sample_ising(
@@ -242,8 +248,7 @@ class BraketDWaveSampler(BraketSampler):
         self._check_kwargs_solver(**kwargs)
 
         # Translate kwargs from D-Wave format to Braket format
-        enum_name = get_arn_to_enum_name_mapping()[self._device_arn]
-        parameter_dict = BraketSolverMetadata[enum_name]["parameters"]
+        parameter_dict = BraketSolverMetadata.get_metadata_by_arn(self._device_arn)["parameters"]
         translated_kwargs = {parameter_dict[key]: kwargs[key] for key in kwargs}
         if "resultFormat" in translated_kwargs:
             translated_kwargs["resultFormat"] = translated_kwargs["resultFormat"].upper()

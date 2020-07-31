@@ -14,17 +14,19 @@
 from conftest import to_base_ten
 from dwave.system.composites import EmbeddingComposite
 
-from braket.ocean_plugin import BraketDWaveSampler, BraketSamplerArns
+from braket.ocean_plugin import BraketDWaveSampler
 
 
 def test_factoring_embedded_composite(
-    aws_session, s3_destination_folder, factoring_bqm, integer_to_factor
+    dwave_arn, aws_session, s3_destination_folder, factoring_bqm, integer_to_factor
 ):
     sampler = BraketDWaveSampler(
-        s3_destination_folder, device_arn=BraketSamplerArns.DWAVE, aws_session=aws_session
+        s3_destination_folder, device_arn=dwave_arn, aws_session=aws_session
     )
     embedding_sampler = EmbeddingComposite(sampler)
-    response = embedding_sampler.sample(factoring_bqm, chain_strength=3, num_reads=1000)
+    response = embedding_sampler.sample(
+        factoring_bqm, chain_strength=3, num_reads=1000, answer_mode="histogram"
+    )
     sample, energy = next(response.data(["sample", "energy"]))
     a, b = to_base_ten(sample)
     assert a * b == integer_to_factor

@@ -25,12 +25,7 @@ from conftest import (
 )
 from dimod.exceptions import BinaryQuadraticModelStructureError
 
-from braket.ocean_plugin import (
-    BraketSampler,
-    BraketSamplerArns,
-    BraketSolverMetadata,
-    InvalidSolverDeviceArn,
-)
+from braket.ocean_plugin import BraketSampler, BraketSolverMetadata
 from braket.tasks import AnnealingQuantumTaskResult
 
 
@@ -47,16 +42,15 @@ def sample_kwargs(braket_dwave_parameters, shots):
 
 
 @pytest.fixture
-def backend_parameters(braket_dwave_parameters):
-    return {BraketSolverMetadata.DWAVE["backend_parameters_key_name"]: braket_dwave_parameters}
+def device_parameters(braket_dwave_parameters):
+    return {BraketSolverMetadata.DWAVE["device_parameters_key_name"]: braket_dwave_parameters}
 
 
 @pytest.fixture
-@patch("braket.ocean_plugin.braket_sampler.AwsQpu")
-def braket_sampler(mock_qpu, braket_sampler_properties, s3_destination_folder, logger):
+@patch("braket.ocean_plugin.braket_sampler.AwsDevice")
+def braket_sampler(mock_qpu, braket_sampler_properties, s3_destination_folder, logger, dwave_arn):
     mock_qpu.return_value.properties = braket_sampler_properties
-    arn = BraketSamplerArns.DWAVE
-    sampler = BraketSampler(s3_destination_folder, arn, Mock(), logger)
+    sampler = BraketSampler(s3_destination_folder, dwave_arn, Mock(), logger)
     return sampler
 
 
@@ -66,14 +60,6 @@ def test_parameters(braket_sampler):
     }
     assert braket_sampler.parameters == expected_params
     assert isinstance(braket_sampler.parameters, FrozenDict)
-
-
-@pytest.mark.xfail(raises=InvalidSolverDeviceArn)
-@patch("braket.ocean_plugin.braket_sampler.AwsQpu")
-def test_arn_invalid(mock_qpu, braket_sampler_properties, s3_destination_folder):
-    mock_qpu.return_value.properties = braket_sampler_properties
-    arn = "test_arn"
-    BraketSampler(s3_destination_folder, arn, Mock())
 
 
 def test_properties(braket_sampler, braket_sampler_properties):
@@ -107,7 +93,7 @@ def test_sample_ising_success(
     s3_ising_result,
     info,
     s3_destination_folder,
-    backend_parameters,
+    device_parameters,
     sample_kwargs,
     shots,
     logger,
@@ -119,7 +105,7 @@ def test_sample_ising_success(
         s3_ising_result,
         info,
         s3_destination_folder,
-        backend_parameters,
+        device_parameters,
         sample_kwargs,
         shots,
         logger,
@@ -133,7 +119,7 @@ def test_sample_ising_quantum_task_success(
     braket_sampler,
     s3_ising_result,
     s3_destination_folder,
-    backend_parameters,
+    device_parameters,
     sample_kwargs,
     shots,
     logger,
@@ -144,7 +130,7 @@ def test_sample_ising_quantum_task_success(
         braket_sampler,
         s3_ising_result,
         s3_destination_folder,
-        backend_parameters,
+        device_parameters,
         sample_kwargs,
         shots,
         logger,
@@ -189,7 +175,7 @@ def test_sample_qubo_dict_success(
     s3_qubo_result,
     info,
     s3_destination_folder,
-    backend_parameters,
+    device_parameters,
     sample_kwargs,
     shots,
     logger,
@@ -199,7 +185,7 @@ def test_sample_qubo_dict_success(
         s3_qubo_result,
         info,
         s3_destination_folder,
-        backend_parameters,
+        device_parameters,
         sample_kwargs,
         shots,
         logger,
@@ -210,7 +196,7 @@ def test_sample_qubo_quasntum_task_dict_success(
     braket_sampler,
     s3_qubo_result,
     s3_destination_folder,
-    backend_parameters,
+    device_parameters,
     sample_kwargs,
     shots,
     logger,
@@ -219,7 +205,7 @@ def test_sample_qubo_quasntum_task_dict_success(
         braket_sampler,
         s3_qubo_result,
         s3_destination_folder,
-        backend_parameters,
+        device_parameters,
         sample_kwargs,
         shots,
         logger,
