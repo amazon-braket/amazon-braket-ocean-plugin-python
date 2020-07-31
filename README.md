@@ -96,10 +96,10 @@ To view the generated documentation, open the following file in a browser:
 This package provides samplers which use Braket solvers. These samplers extend abstract base classes provided in Ocean's dimod and thus have the same interfaces as other samplers in Ocean.
 
 `BraketSampler` is a structured sampler that uses Braket-formatted parameters and properties. For example, instead of `answer_mode`, which is used for D-Wave QPU samplers, Braket uses `resultFormat` instead.
-[Linked](../blob/master/examples/braket_sampler.py) is a sample example of solving the [minimum vertex cover](https://en.wikipedia.org/wiki/Vertex_cover) problem using `BraketSampler`.
+[Linked](../blob/examples/braket_sampler.py) is a sample example of solving the [minimum vertex cover](https://en.wikipedia.org/wiki/Vertex_cover) problem using `BraketSampler`.
 
 `BraketDWaveSampler` is a structured sampler that uses D-Wave-formatted parameters and properties. It is interchangeable with D-Wave's `DWaveSampler`.
-[Linked](../blob/master/examples/braket_dwave_sampler.py) is the same example as above of solving the minimum vertex cover problem. Only the parameter inputs to the solver have been changed to be D-Wave formatted (e.g. `answer_mode` instead of `resultFormat`).
+[Linked](../blob/examples/braket_dwave_sampler.py) is the same example as above of solving the minimum vertex cover problem. Only the parameter inputs to the solver have been changed to be D-Wave formatted (e.g. `answer_mode` instead of `resultFormat`).
 
 These usage examples can be found as python scripts in the `BRAKET_OCEAN_PLUGIN_ROOT/examples/` folder.
 
