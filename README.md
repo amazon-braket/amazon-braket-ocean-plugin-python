@@ -49,7 +49,7 @@ Use the following commands to install the package:
 pip install -e amazon-braket-ocean-plugin-python
 ```
 
-You can check your currently installed version of `amazon-braket-ocean-plugin-python` with `pip show`:
+You can check your currently installed version of `amazon-braket-ocean-plugin` with `pip show`:
 
 ```bash
 pip show amazon-braket-ocean-plugin
