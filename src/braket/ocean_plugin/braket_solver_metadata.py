@@ -12,6 +12,9 @@
 # language governing permissions and limitations under the License.
 
 from enum import Enum
+from typing import Any, Dict
+
+from braket.ocean_plugin.exceptions import InvalidSolverDeviceArn
 
 
 class BraketSolverMetadata(dict, Enum):
@@ -68,5 +71,27 @@ class BraketSolverMetadata(dict, Enum):
             "taskRunDurationRange": "problem_run_duration_range",
             "topology": "topology",
         },
-        "backend_parameters_key_name": "dWaveParameters",
+        "device_parameters_key_name": "dWaveParameters",
     }
+
+    @staticmethod
+    def get_metadata_by_arn(device_arn: str) -> Dict[str, Any]:
+        """
+        Get metadata by device ARN
+
+        Args:
+            device_arn (str): The ARN of the device
+
+        Returns:
+            Dict[str, Any]: Dictionary containing solver metadata. Keys include "parameters"
+            which is a dict containing Braket formatted parameters to provider-formatted parameters,
+            "backend_parameters_key_name" which is the key name per solver for
+            "backend_parameters" argument in Braket create_quantum_task API.
+
+        Raises:
+            InvalidSolverDeviceArn: If the device ARN is invalid for getting
+            the metadata
+        """
+        if device_arn.split("/")[-2] == "d-wave":
+            return BraketSolverMetadata.DWAVE
+        raise InvalidSolverDeviceArn(f"Invalid device ARN {device_arn}")

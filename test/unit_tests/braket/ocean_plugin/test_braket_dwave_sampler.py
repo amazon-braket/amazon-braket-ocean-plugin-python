@@ -22,12 +22,7 @@ from conftest import (
     sample_qubo_quantum_task_common_testing,
 )
 
-from braket.ocean_plugin import (
-    BraketDWaveSampler,
-    BraketSampler,
-    BraketSamplerArns,
-    BraketSolverMetadata,
-)
+from braket.ocean_plugin import BraketDWaveSampler, BraketSampler, BraketSolverMetadata
 
 
 @pytest.fixture
@@ -36,9 +31,9 @@ def sample_kwargs_1(shots):
 
 
 @pytest.fixture
-def backend_parameters_1():
+def device_parameters_1():
     return {
-        BraketSolverMetadata.DWAVE["backend_parameters_key_name"]: {
+        BraketSolverMetadata.DWAVE["device_parameters_key_name"]: {
             "postprocessingType": "SAMPLING",
             "resultFormat": "HISTOGRAM",
         }
@@ -51,18 +46,30 @@ def sample_kwargs_2(shots):
 
 
 @pytest.fixture
-def backend_parameters_2():
-    return {BraketSolverMetadata.DWAVE["backend_parameters_key_name"]: {}}
+def device_parameters_2():
+    return {BraketSolverMetadata.DWAVE["device_parameters_key_name"]: {}}
 
 
 @pytest.fixture
-@patch("braket.ocean_plugin.braket_sampler.AwsQpu")
-def braket_dwave_sampler(mock_qpu, braket_sampler_properties, s3_destination_folder, logger):
+@patch("braket.ocean_plugin.braket_sampler.AwsDevice")
+def braket_dwave_sampler(
+    mock_qpu, braket_sampler_properties, s3_destination_folder, logger, dwave_arn
+):
     mock_qpu.return_value.properties = braket_sampler_properties
-    arn = BraketSamplerArns.DWAVE
-    sampler = BraketDWaveSampler(s3_destination_folder, arn, Mock(), logger)
+    sampler = BraketDWaveSampler(s3_destination_folder, dwave_arn, Mock(), logger)
     assert isinstance(sampler, BraketSampler)
     return sampler
+
+
+@patch("braket.ocean_plugin.braket_sampler.AwsDevice")
+def test_default_device_arn(
+    mock_qpu, braket_sampler_properties, s3_destination_folder, logger, dwave_arn
+):
+    mock_qpu.return_value.properties = braket_sampler_properties
+    sampler = BraketDWaveSampler(s3_destination_folder, None, Mock(), logger)
+    assert isinstance(sampler, BraketSampler)
+    assert sampler._device_arn == dwave_arn
+    # TODO: replace with test for call to API to get default ARN
 
 
 def test_parameters(braket_dwave_sampler):
@@ -92,7 +99,7 @@ def test_sample_ising_dict_success(
     s3_ising_result,
     info,
     s3_destination_folder,
-    backend_parameters_1,
+    device_parameters_1,
     sample_kwargs_1,
     shots,
     logger,
@@ -104,7 +111,7 @@ def test_sample_ising_dict_success(
         s3_ising_result,
         info,
         s3_destination_folder,
-        backend_parameters_1,
+        device_parameters_1,
         sample_kwargs_1,
         shots,
         logger,
@@ -118,7 +125,7 @@ def test_sample_ising_quantum_task_success(
     braket_dwave_sampler,
     s3_ising_result,
     s3_destination_folder,
-    backend_parameters_1,
+    device_parameters_1,
     sample_kwargs_1,
     shots,
     logger,
@@ -129,19 +136,19 @@ def test_sample_ising_quantum_task_success(
         braket_dwave_sampler,
         s3_ising_result,
         s3_destination_folder,
-        backend_parameters_1,
+        device_parameters_1,
         sample_kwargs_1,
         shots,
         logger,
     )
 
 
-def test_sample_qubo_dict_success_backend_parameters(
+def test_sample_qubo_dict_success_device_parameters(
     braket_dwave_sampler,
     s3_qubo_result,
     info,
     s3_destination_folder,
-    backend_parameters_1,
+    device_parameters_1,
     sample_kwargs_1,
     shots,
     logger,
@@ -151,19 +158,19 @@ def test_sample_qubo_dict_success_backend_parameters(
         s3_qubo_result,
         info,
         s3_destination_folder,
-        backend_parameters_1,
+        device_parameters_1,
         sample_kwargs_1,
         shots,
         logger,
     )
 
 
-def test_sample_qubo_dict_success_no_backend_parameters(
+def test_sample_qubo_dict_success_no_device_parameters(
     braket_dwave_sampler,
     s3_qubo_result,
     info,
     s3_destination_folder,
-    backend_parameters_2,
+    device_parameters_2,
     sample_kwargs_2,
     shots,
     logger,
@@ -173,7 +180,7 @@ def test_sample_qubo_dict_success_no_backend_parameters(
         s3_qubo_result,
         info,
         s3_destination_folder,
-        backend_parameters_2,
+        device_parameters_2,
         sample_kwargs_2,
         shots,
         logger,
@@ -184,7 +191,7 @@ def test_sample_qubo_quantum_task_dict_success(
     braket_dwave_sampler,
     s3_qubo_result,
     s3_destination_folder,
-    backend_parameters_1,
+    device_parameters_1,
     sample_kwargs_1,
     shots,
     logger,
@@ -193,7 +200,7 @@ def test_sample_qubo_quantum_task_dict_success(
         braket_dwave_sampler,
         s3_qubo_result,
         s3_destination_folder,
-        backend_parameters_1,
+        device_parameters_1,
         sample_kwargs_1,
         shots,
         logger,

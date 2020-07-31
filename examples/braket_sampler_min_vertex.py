@@ -15,10 +15,10 @@ import dwave_networkx as dnx
 import networkx as nx
 from dwave.system.composites import EmbeddingComposite
 
-from braket.ocean_plugin import BraketSampler, BraketSamplerArns
+from braket.ocean_plugin import BraketSampler
 
 s3_destination_folder = ("your-s3-bucket", "your-folder")
-sampler = BraketSampler(s3_destination_folder, BraketSamplerArns.DWAVE)
+sampler = BraketSampler(s3_destination_folder, "arn:aws:braket:::device/qpu/d-wave/DW_2000Q_6")
 
 star_graph = nx.star_graph(4)  # star graph where node 0 is connected to 4 other nodes
 

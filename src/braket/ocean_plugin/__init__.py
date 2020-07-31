@@ -13,7 +13,6 @@
 
 from braket.ocean_plugin.braket_dwave_sampler import BraketDWaveSampler  # noqa: F401
 from braket.ocean_plugin.braket_sampler import BraketSampler  # noqa: F401
-from braket.ocean_plugin.braket_sampler_arns import BraketSamplerArns  # noqa: F401
 from braket.ocean_plugin.braket_solver_metadata import BraketSolverMetadata  # noqa: F401
 from braket.ocean_plugin.exceptions import InvalidSolverDeviceArn  # noqa: F401
 

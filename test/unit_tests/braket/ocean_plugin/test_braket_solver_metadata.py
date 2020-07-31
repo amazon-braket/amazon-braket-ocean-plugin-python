@@ -11,16 +11,16 @@
 # ANY KIND, either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
 
-from enum import Enum
-from functools import lru_cache
-from typing import Dict
+
+import pytest
+
+from braket.ocean_plugin import BraketSolverMetadata, InvalidSolverDeviceArn
 
 
-class BraketSamplerArns(str, Enum):
-    DWAVE = "arn:aws:aqx:::qpu:d-wave"
+def test_get_metadata_by_arn(dwave_arn):
+    assert isinstance(BraketSolverMetadata.get_metadata_by_arn(dwave_arn), dict)
 
 
-@lru_cache(maxsize=1)
-def get_arn_to_enum_name_mapping() -> Dict[str, str]:
-    """Get the mapping of ARN to enum name"""
-    return {item.value: item.name for item in BraketSamplerArns}
+@pytest.mark.xfail(raises=InvalidSolverDeviceArn)
+def test_get_metadata_by_arn_invalid():
+    BraketSolverMetadata.get_metadata_by_arn("arn:aws:braket:::device/qpu/foo/DW_2000Q_6")

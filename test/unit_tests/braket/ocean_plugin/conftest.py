@@ -19,8 +19,12 @@ import pytest
 from dimod import BINARY, SPIN, SampleSet
 
 from braket.annealing.problem import Problem, ProblemType
-from braket.ocean_plugin import BraketSamplerArns
 from braket.tasks import AnnealingQuantumTaskResult
+
+
+@pytest.fixture
+def dwave_arn():
+    return "arn:aws:braket:::device/qpu/d-wave/DW_2000Q_6"
 
 
 @pytest.fixture
@@ -89,8 +93,8 @@ def additional_metadata():
 
 
 @pytest.fixture
-def task_metadata(shots):
-    return {"taskMetadata": {"id": "task_arn", "shots": shots, "deviceId": BraketSamplerArns.DWAVE}}
+def task_metadata(shots, dwave_arn):
+    return {"taskMetadata": {"id": "task_arn", "shots": shots, "deviceId": dwave_arn}}
 
 
 @pytest.fixture
@@ -142,7 +146,7 @@ def logger():
 def _sample_common_asserts(
     sampler,
     s3_destination_folder,
-    backend_parameters,
+    device_parameters,
     shots,
     logger,
     linear,
@@ -153,7 +157,7 @@ def _sample_common_asserts(
     args, kwargs = call_list[0]
     assert args[1] == s3_destination_folder
     assert kwargs["logger"] == logger
-    assert kwargs["backend_parameters"] == backend_parameters
+    assert kwargs["device_parameters"] == device_parameters
     assert kwargs["shots"] == shots
     problem = args[0]
     assert isinstance(problem, Problem)
@@ -171,7 +175,7 @@ def sample_ising_quantum_task_common_testing(
     sampler,
     s3_ising_result,
     s3_destination_folder,
-    backend_parameters,
+    device_parameters,
     sample_kwargs,
     shots,
     logger,
@@ -184,7 +188,7 @@ def sample_ising_quantum_task_common_testing(
     _sample_common_asserts(
         sampler,
         s3_destination_folder,
-        backend_parameters,
+        device_parameters,
         shots,
         logger,
         linear,
@@ -201,7 +205,7 @@ def sample_ising_common_testing(
     s3_ising_result,
     info,
     s3_destination_folder,
-    backend_parameters,
+    device_parameters,
     sample_kwargs,
     shots,
     logger,
@@ -214,7 +218,7 @@ def sample_ising_common_testing(
     _sample_common_asserts(
         sampler,
         s3_destination_folder,
-        backend_parameters,
+        device_parameters,
         shots,
         logger,
         linear,
@@ -228,13 +232,7 @@ def sample_ising_common_testing(
 
 
 def sample_qubo_quantum_task_common_testing(
-    sampler,
-    s3_qubo_result,
-    s3_destination_folder,
-    backend_parameters,
-    sample_kwargs,
-    shots,
-    logger,
+    sampler, s3_qubo_result, s3_destination_folder, device_parameters, sample_kwargs, shots, logger,
 ):
     """Common testing of sample_qubo_quantum_task for Braket samplers"""
     task = Mock()
@@ -245,7 +243,7 @@ def sample_qubo_quantum_task_common_testing(
     _sample_common_asserts(
         sampler,
         s3_destination_folder,
-        backend_parameters,
+        device_parameters,
         shots,
         logger,
         {0: 0},
@@ -260,7 +258,7 @@ def sample_qubo_common_testing(
     s3_qubo_result,
     info,
     s3_destination_folder,
-    backend_parameters,
+    device_parameters,
     sample_kwargs,
     shots,
     logger,
@@ -274,7 +272,7 @@ def sample_qubo_common_testing(
     _sample_common_asserts(
         sampler,
         s3_destination_folder,
-        backend_parameters,
+        device_parameters,
         shots,
         logger,
         {0: 0},

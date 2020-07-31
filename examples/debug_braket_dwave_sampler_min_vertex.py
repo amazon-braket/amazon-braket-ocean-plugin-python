@@ -17,7 +17,7 @@ import dwave_networkx as dnx
 import networkx as nx
 from dwave.system.composites import EmbeddingComposite
 
-from braket.ocean_plugin import BraketDWaveSampler, BraketSamplerArns
+from braket.ocean_plugin import BraketDWaveSampler
 
 logger = logging.getLogger("newLogger")  # create new logger
 logger.addHandler(
@@ -28,7 +28,7 @@ logger.setLevel(logging.DEBUG)  # log to file all log messages with level DEBUG 
 s3_destination_folder = ("your-s3-bucket", "your-folder")
 
 # Pass in logger to BraketDWaveSampler
-sampler = BraketDWaveSampler(s3_destination_folder, BraketSamplerArns.DWAVE, logger=logger)
+sampler = BraketDWaveSampler(s3_destination_folder, logger=logger)
 
 star_graph = nx.star_graph(4)  # star graph where node 0 is connected to 4 other nodes
 
