@@ -19,6 +19,7 @@ import pytest
 from dimod import BINARY, SPIN, SampleSet
 
 from braket.annealing.problem import Problem, ProblemType
+from braket.device_schema.dwave import DwaveDeviceCapabilities
 from braket.tasks import AnnealingQuantumTaskResult
 
 
@@ -33,7 +34,42 @@ def shots():
 
 
 @pytest.fixture
-def braket_sampler_properties():
+def service_properties():
+    return {"shotsRange": (0, 10)}
+
+
+# TODO: uncomment when hRange, quotaConversionRate, etc. get made
+# into floats in DwaveDeviceCapabilities
+# @pytest.fixture
+# def provider_properties():
+#     return {
+#         "annealingOffsetStep": 2.0,
+#         "annealingOffsetStepPhi0": 4.0,
+#         "annealingOffsetRanges": [[1.34, 5.23], [3.24, 1.44]],
+#         "annealingDurationRange": [3, 5],
+#         "couplers": [[1, 2], [0, 2]],
+#         "defaultAnnealingDuration": 4,
+#         "defaultProgrammingThermalizationDuration": 2,
+#         "defaultReadoutThermalizationDuration": 1,
+#         "extendedJRange": [3.0, 4.0],
+#         "hGainScheduleRange": [2.0, 3.0],
+#         "hRange": [3.4, 5.6],
+#         "jRange": [1.0, 2.0],
+#         "maximumAnnealingSchedulePoints": 3,
+#         "maximumHGainSchedulePoints": 2,
+#         "qubitCount": 3,
+#         "qubits": [1, 0, 2],
+#         "perQubitCouplingRange": [1.0, 3.0],
+#         "programmingThermalizationDurationRange": [1, 2],
+#         "quotaConversionRate": 2.5,
+#         "readoutThermalizationDurationRange": [4, 6],
+#         "taskRunDurationRange": [3, 6],
+#         "topology": {"type": "chimera", "topology": [1, 1, 1]},
+#     }
+
+
+@pytest.fixture
+def provider_properties():
     return {
         "annealingOffsetStep": 2.0,
         "annealingOffsetStepPhi0": 4.0,
@@ -45,7 +81,7 @@ def braket_sampler_properties():
         "defaultReadoutThermalizationDuration": 1,
         "extendedJRange": [3.0, 4.0],
         "hGainScheduleRange": [2.0, 3.0],
-        "hRange": [3.4, 5.6],
+        "hRange": [3.0, 5.0],
         "jRange": [1.0, 2.0],
         "maximumAnnealingSchedulePoints": 3,
         "maximumHGainSchedulePoints": 2,
@@ -53,16 +89,50 @@ def braket_sampler_properties():
         "qubits": [1, 0, 2],
         "perQubitCouplingRange": [1.0, 3.0],
         "programmingThermalizationDurationRange": [1, 2],
-        "quotaConversionRate": 2.5,
+        "quotaConversionRate": 2,
         "readoutThermalizationDurationRange": [4, 6],
-        "shotsRange": [3, 5],
         "taskRunDurationRange": [3, 6],
         "topology": {"type": "chimera", "topology": [1, 1, 1]},
     }
 
 
+@pytest.fixture
+def braket_sampler_properties(provider_properties, service_properties):
+    return DwaveDeviceCapabilities.parse_obj(
+        {
+            "braketSchemaHeader": {
+                "name": "braket.device_schema.dwave.dwave_device_capabilities",
+                "version": "1",
+            },
+            "provider": provider_properties,
+            "service": {
+                "executionWindows": [
+                    {
+                        "executionDay": "Everyday",
+                        "windowStartHour": "11:00",
+                        "windowEndHour": "12:00",
+                    }
+                ],
+                "shotsRange": service_properties["shotsRange"],
+            },
+            "action": {
+                "braket.ir.annealing.problem": {
+                    "actionType": "braket.ir.annealing.problem",
+                    "version": ["1"],
+                }
+            },
+            "deviceParameters": {},
+        }
+    )
+
+
+@pytest.fixture
+def active_variables():
+    return [4, 5, 6]
+
+
 @pytest.fixture()
-def additional_metadata():
+def additional_metadata(active_variables):
     return {
         "additionalMetadata": {
             "action": {
@@ -71,7 +141,7 @@ def additional_metadata():
                 "quadratic": {"0,4": 0.667, "0,5": -1.0, "1,4": 0.667, "1,5": 0.667},
             },
             "dwaveMetadata": {
-                "activeVariables": [0],
+                "activeVariables": active_variables,
                 "timing": {
                     "qpuSamplingTime": 100,
                     "qpuAnnealTimePerSample": 20,
@@ -100,10 +170,10 @@ def task_metadata(shots, dwave_arn):
 @pytest.fixture
 def result(additional_metadata, task_metadata):
     result = {
-        "solutions": [[-1, -1, -1, -1], [1, -1, 1, 1], [1, -1, -1, 1]],
+        "solutions": [[-1, -1, -1], [1, -1, 1], [1, -1, -1]],
         "solutionCounts": [3, 2, 4],
         "values": [0.0, 1.0, 2.0],
-        "variableCount": 2,
+        "variableCount": 2048,
     }
     result.update(additional_metadata)
     result.update(task_metadata)

@@ -71,7 +71,13 @@ class BraketSampler(Sampler, Structured):
         Solver properties are dependent on the selected solver and subject to change;
         for example, new released features may add properties.
         """
-        return FrozenDict(copy.deepcopy(self.solver.properties))
+        mapping_dict = BraketSolverMetadata.get_metadata_by_arn(self._device_arn)["properties"]
+        return_dict = {}
+        for top_level_key in mapping_dict:
+            solver_dict = getattr(self.solver.properties, top_level_key).dict()
+            for key in mapping_dict[top_level_key]:
+                return_dict[key] = copy.deepcopy(solver_dict[key])
+        return FrozenDict(return_dict)
 
     @property
     @lru_cache(maxsize=1)
@@ -379,7 +385,7 @@ class BraketSampler(Sampler, Structured):
             result: AnnealingQuantumTaskResult = computation.result()
             # get the samples. The future will return all spins so filter for the ones in variables
             vars = BraketSampler._vars_from_variables(result, variables)
-            samples = [[sample[v] for v in vars] for sample in result.record_array.solution]
+            samples = [sample for sample in result.record_array.solution]
             energy = result.record_array.value
             num_occurrences = result.record_array.solution_count
             info = {
@@ -406,6 +412,7 @@ class BraketSampler(Sampler, Structured):
             return frozenset(variables)
         dwave_metadata = result.additional_metadata.dwaveMetadata
         if dwave_metadata and dwave_metadata.activeVariables:
+            # solutions only has the active variables for d-wave
             return frozenset(dwave_metadata.activeVariables)
         return frozenset(list(range(result.variable_count)))
 
