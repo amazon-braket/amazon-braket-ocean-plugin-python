@@ -62,9 +62,10 @@ def test_parameters(braket_sampler):
     assert isinstance(braket_sampler.parameters, FrozenDict)
 
 
-def test_properties(braket_sampler, braket_sampler_properties):
+def test_properties(braket_sampler, provider_properties, service_properties):
+    provider_properties.update(service_properties)
     assert isinstance(braket_sampler.properties, FrozenDict)
-    assert braket_sampler.properties == braket_sampler_properties
+    assert braket_sampler.properties == provider_properties
 
 
 def test_edgelist(braket_sampler):
@@ -148,26 +149,30 @@ def test_sample_qubo_value_error(braket_sampler):
 
 
 def test_get_task_sample_set_variables(s3_qubo_result,):
+    s3_dict = json.loads(s3_qubo_result)
+    del s3_dict["additionalMetadata"]["dwaveMetadata"]
     task = Mock()
-    task.result.return_value = AnnealingQuantumTaskResult.from_string(s3_qubo_result)
-    actual = BraketSampler.get_task_sample_set(task, variables=[1])
-    assert list(actual.variables) == [1]
+    variables = [8, 9, 10]
+    task.result.return_value = AnnealingQuantumTaskResult.from_string(json.dumps(s3_dict))
+    actual = BraketSampler.get_task_sample_set(task, variables=variables)
+    assert list(actual.variables) == variables
 
 
-def test_get_task_sample_active_variables(s3_qubo_result,):
+def test_get_task_sample_active_variables(s3_qubo_result, active_variables):
     task = Mock()
     task.result.return_value = AnnealingQuantumTaskResult.from_string(s3_qubo_result)
     actual = BraketSampler.get_task_sample_set(task)
-    assert list(actual.variables) == [0]
+    assert list(actual.variables) == active_variables
 
 
 def test_get_task_sample_no_active_variables(s3_qubo_result,):
     s3_dict = json.loads(s3_qubo_result)
     del s3_dict["additionalMetadata"]["dwaveMetadata"]
+    s3_dict["variableCount"] = 3
     task = Mock()
     task.result.return_value = AnnealingQuantumTaskResult.from_string(json.dumps(s3_dict))
     actual = BraketSampler.get_task_sample_set(task)
-    assert list(actual.variables) == [0, 1]
+    assert list(actual.variables) == list(range(s3_dict["variableCount"]))
 
 
 def test_sample_qubo_dict_success(

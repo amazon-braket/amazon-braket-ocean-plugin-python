@@ -19,6 +19,7 @@ import pytest
 from dimod import BINARY, SPIN, SampleSet
 
 from braket.annealing.problem import Problem, ProblemType
+from braket.device_schema.dwave import DwaveDeviceCapabilities
 from braket.tasks import AnnealingQuantumTaskResult
 
 
@@ -33,7 +34,12 @@ def shots():
 
 
 @pytest.fixture
-def braket_sampler_properties():
+def service_properties():
+    return {"shotsRange": (0, 10)}
+
+
+@pytest.fixture
+def provider_properties():
     return {
         "annealingOffsetStep": 2.0,
         "annealingOffsetStepPhi0": 4.0,
@@ -55,14 +61,48 @@ def braket_sampler_properties():
         "programmingThermalizationDurationRange": [1, 2],
         "quotaConversionRate": 2.5,
         "readoutThermalizationDurationRange": [4, 6],
-        "shotsRange": [3, 5],
         "taskRunDurationRange": [3, 6],
         "topology": {"type": "chimera", "topology": [1, 1, 1]},
     }
 
 
+@pytest.fixture
+def braket_sampler_properties(provider_properties, service_properties):
+    return DwaveDeviceCapabilities.parse_obj(
+        {
+            "braketSchemaHeader": {
+                "name": "braket.device_schema.dwave.dwave_device_capabilities",
+                "version": "1",
+            },
+            "provider": provider_properties,
+            "service": {
+                "executionWindows": [
+                    {
+                        "executionDay": "Everyday",
+                        "windowStartHour": "11:00",
+                        "windowEndHour": "12:00",
+                    }
+                ],
+                "shotsRange": service_properties["shotsRange"],
+            },
+            "action": {
+                "braket.ir.annealing.problem": {
+                    "actionType": "braket.ir.annealing.problem",
+                    "version": ["1"],
+                }
+            },
+            "deviceParameters": {},
+        }
+    )
+
+
+@pytest.fixture
+def active_variables():
+    return [4, 5, 6]
+
+
 @pytest.fixture()
-def additional_metadata():
+def additional_metadata(active_variables):
     return {
         "additionalMetadata": {
             "action": {
@@ -71,7 +111,7 @@ def additional_metadata():
                 "quadratic": {"0,4": 0.667, "0,5": -1.0, "1,4": 0.667, "1,5": 0.667},
             },
             "dwaveMetadata": {
-                "activeVariables": [0],
+                "activeVariables": active_variables,
                 "timing": {
                     "qpuSamplingTime": 100,
                     "qpuAnnealTimePerSample": 20,
@@ -100,10 +140,10 @@ def task_metadata(shots, dwave_arn):
 @pytest.fixture
 def result(additional_metadata, task_metadata):
     result = {
-        "solutions": [[-1, -1, -1, -1], [1, -1, 1, 1], [1, -1, -1, 1]],
+        "solutions": [[-1, -1, -1], [1, -1, 1], [1, -1, -1]],
         "solutionCounts": [3, 2, 4],
         "values": [0.0, 1.0, 2.0],
-        "variableCount": 2,
+        "variableCount": 2048,
     }
     result.update(additional_metadata)
     result.update(task_metadata)

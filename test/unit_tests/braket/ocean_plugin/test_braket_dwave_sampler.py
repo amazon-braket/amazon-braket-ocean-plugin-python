@@ -78,16 +78,22 @@ def test_parameters(braket_dwave_sampler):
     assert isinstance(braket_dwave_sampler.parameters, FrozenDict)
 
 
-def test_properties(braket_dwave_sampler, braket_sampler_properties):
+def test_properties(braket_dwave_sampler, provider_properties, service_properties):
     assert isinstance(braket_dwave_sampler.properties, FrozenDict)
-    expected = FrozenDict(
-        {
-            BraketSolverMetadata.DWAVE["properties"][braket_key]: braket_sampler_properties[
-                braket_key
-            ]
-            for braket_key in braket_sampler_properties
-        }
-    )
+    translated_provider_properties = {
+        BraketSolverMetadata.DWAVE["properties"]["provider"][braket_key]: provider_properties[
+            braket_key
+        ]
+        for braket_key in provider_properties
+    }
+    translated_service_properties = {
+        BraketSolverMetadata.DWAVE["properties"]["service"][braket_key]: service_properties[
+            braket_key
+        ]
+        for braket_key in service_properties
+    }
+    translated_provider_properties.update(translated_service_properties)
+    expected = FrozenDict(translated_provider_properties)
     assert braket_dwave_sampler.properties == expected
 
 

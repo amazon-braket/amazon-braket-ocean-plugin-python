@@ -70,14 +70,13 @@ class BraketDWaveSampler(BraketSampler):
         Solver properties are dependent on the selected solver and subject to change;
         for example, new released features may add properties.
         """
-        return FrozenDict(
-            {
-                BraketSolverMetadata.get_metadata_by_arn(self._device_arn)["properties"][
-                    braket_key
-                ]: copy.deepcopy(self.solver.properties[braket_key])
-                for braket_key in self.solver.properties
-            }
-        )
+        mapping_dict = BraketSolverMetadata.get_metadata_by_arn(self._device_arn)["properties"]
+        return_dict = {}
+        for top_level_key in mapping_dict:
+            solver_dict = getattr(self.solver.properties, top_level_key).dict()
+            for key in mapping_dict[top_level_key]:
+                return_dict[mapping_dict[top_level_key][key]] = copy.deepcopy(solver_dict[key])
+        return FrozenDict(return_dict)
 
     @property
     @lru_cache(maxsize=1)
