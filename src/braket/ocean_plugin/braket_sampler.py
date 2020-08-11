@@ -17,7 +17,7 @@ from __future__ import annotations
 import copy
 from functools import lru_cache
 from logging import Logger, getLogger
-from typing import Any, Dict, FrozenSet, List, Set, Tuple, Union
+from typing import Any, Dict, List, Set, Tuple, Union
 
 from boltons.dictutils import FrozenDict
 from dimod import BINARY, SPIN, Sampler, SampleSet, Structured
@@ -406,7 +406,7 @@ class BraketSampler(Sampler, Structured):
 
     @staticmethod
     def _vars_from_variables(
-            result: AnnealingQuantumTaskResult, variables: Set[int] = None
+        result: AnnealingQuantumTaskResult, variables: Set[int] = None
     ) -> Tuple[int]:
         dwave_metadata = result.additional_metadata.dwaveMetadata
         if dwave_metadata and dwave_metadata.activeVariables:
