@@ -149,9 +149,11 @@ def test_sample_qubo_value_error(braket_sampler):
 
 
 def test_get_task_sample_set_variables(s3_qubo_result,):
+    s3_dict = json.loads(s3_qubo_result)
+    del s3_dict["additionalMetadata"]["dwaveMetadata"]
     task = Mock()
     variables = [8, 9, 10]
-    task.result.return_value = AnnealingQuantumTaskResult.from_string(s3_qubo_result)
+    task.result.return_value = AnnealingQuantumTaskResult.from_string(json.dumps(s3_dict))
     actual = BraketSampler.get_task_sample_set(task, variables=variables)
     assert list(actual.variables) == variables
 

@@ -406,15 +406,14 @@ class BraketSampler(Sampler, Structured):
 
     @staticmethod
     def _vars_from_variables(
-        result: AnnealingQuantumTaskResult, variables: Set[int] = None
-    ) -> FrozenSet[int]:
-        if variables:
-            return frozenset(variables)
+            result: AnnealingQuantumTaskResult, variables: Set[int] = None
+    ) -> Tuple[int]:
         dwave_metadata = result.additional_metadata.dwaveMetadata
         if dwave_metadata and dwave_metadata.activeVariables:
-            # solutions only has the active variables for d-wave
-            return frozenset(dwave_metadata.activeVariables)
-        return frozenset(list(range(result.variable_count)))
+            return tuple(dwave_metadata.activeVariables)
+        if variables:
+            return tuple(sorted(variables))
+        return tuple(range(result.variable_count))
 
     @staticmethod
     def _vartype_from_problem_type(problem_type: str) -> Union[SPIN, BINARY]:

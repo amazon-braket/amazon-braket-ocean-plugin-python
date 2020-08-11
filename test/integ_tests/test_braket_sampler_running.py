@@ -25,7 +25,7 @@ def test_factoring_minorminer(
     _, target_edgelist, target_adjacency = sampler.structure
     embedding = minorminer.find_embedding(factoring_bqm.quadratic, target_edgelist)
     bqm_embedded = embed_bqm(factoring_bqm, embedding, target_adjacency, 3.0)
-    unembedded_response = sampler.sample(bqm_embedded, shots=1000, resultFormat="histogram")
+    unembedded_response = sampler.sample(bqm_embedded, shots=1000, resultFormat="HISTOGRAM")
     response = unembed_sampleset(unembedded_response, embedding, source_bqm=factoring_bqm)
     sample, energy = next(response.data(["sample", "energy"]))
     a, b = to_base_ten(sample)
