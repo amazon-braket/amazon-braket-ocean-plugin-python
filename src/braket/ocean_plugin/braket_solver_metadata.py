@@ -19,10 +19,9 @@ from braket.ocean_plugin.exceptions import InvalidSolverDeviceArn
 
 class BraketSolverMetadata(dict, Enum):
     """
-    Per solver a dict containing solver metadata. Keys include "parameters"
-        which is a dict containing Braket formatted parameters to D-Wave formatted parameters,
-        "backend_parameters_key_name" which is the key name per solver for
-        "backend_parameters" argument in Braket create_quantum_task API.
+    Per solver a dict containing solver metadata.
+
+    The solver metadata format is liable to change.
     """
 
     DWAVE = {
@@ -85,14 +84,11 @@ class BraketSolverMetadata(dict, Enum):
             device_arn (str): The ARN of the device
 
         Returns:
-            Dict[str, Any]: Dictionary containing solver metadata. Keys include "parameters"
-            which is a dict containing Braket formatted parameters to provider-formatted parameters,
-            "backend_parameters_key_name" which is the key name per solver for
-            "backend_parameters" argument in Braket create_quantum_task API.
+            Dict[str, Any]: Dictionary containing solver metadata.
 
         Raises:
             InvalidSolverDeviceArn: If the device ARN is invalid for getting
-            the metadata
+                the metadata
         """
         if device_arn.split("/")[-2] == "d-wave":
             return BraketSolverMetadata.DWAVE
