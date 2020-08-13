@@ -9,7 +9,7 @@ Download and install Python 3.7.2 or greater from [Python.org](https://www.pytho
 If you are using Windows, choose **Add Python to environment variables** before you begin the installation.
 
 ### Amazon Braket SDK
-Download and install the Amazon Braket SDK. Follow the instructions in the [README](https://github.com/aws/amazon-braket-sdk-python/blob/main/README.md).
+Make sure that your AWS account is onboarded to Amazon Braket, as per the instructions in the [README](https://github.com/aws/amazon-braket-sdk-python#prerequisites).
 
 ### Ocean tools
 Download and install [Ocean tools](https://docs.ocean.dwavesys.com/en/latest/overview/install.html).
@@ -18,7 +18,14 @@ pip install dwave-ocean-sdk
 ```
 
 ## Install the Amazon Braket Ocean Plugin
-You can install from source by cloning this repository and running a pip install command in the root directory of the repository:
+
+The Amazon Braket Ocean Plugin can be installed with pip as follows:
+
+```bash
+pip install amazon-braket-ocean-plugin
+```
+
+You can also install from source by cloning this repository and running a pip install command in the root directory of the repository:
 
 ```bash
 git clone https://github.com/aws/amazon-braket-ocean-plugin-python.git
