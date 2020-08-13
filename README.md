@@ -1,3 +1,4 @@
+## Amazon Braket Ocean Plugin
 The Amazon Braket Ocean Plugin is an open source library in Python that provides a framework that you can use to interact with Ocean tools on top of Amazon Braket.
 
 ## Prerequisites
@@ -16,7 +17,7 @@ Download and install [Ocean tools](https://docs.ocean.dwavesys.com/en/latest/ove
 pip install dwave-ocean-sdk
 ```
 
-## Install the Amazon Braket Ocean Plug-in
+## Install the Amazon Braket Ocean Plugin
 You can install from source by cloning this repository and running a pip install command in the root directory of the repository:
 
 ```bash
@@ -62,10 +63,10 @@ To view the generated documentation, open the following file in a browser:
 This package provides samplers which use Braket solvers. These samplers extend abstract base classes provided in Ocean's dimod and thus have the same interfaces as other samplers in Ocean.
 
 `BraketSampler` is a structured sampler that uses Braket-formatted parameters and properties. For example, instead of `answer_mode`, which is used for D-Wave QPU samplers, Braket uses `resultFormat` instead.
-[Linked](../blob/examples/braket_sampler_min_vertex.py) is a sample example of solving the [minimum vertex cover](https://en.wikipedia.org/wiki/Vertex_cover) problem using `BraketSampler`.
+[Linked](https://github.com/aws/amazon-braket-ocean-plugin-python/blob/main/examples/braket_sampler_min_vertex.py) is a sample example of solving the [minimum vertex cover](https://en.wikipedia.org/wiki/Vertex_cover) problem using `BraketSampler`.
 
 `BraketDWaveSampler` is a structured sampler that uses D-Wave-formatted parameters and properties. It is interchangeable with D-Wave's `DWaveSampler`.
-[Linked](../blob/examples/braket_dwave_sampler_min_vertex.py) is the same example as above of solving the minimum vertex cover problem. Only the parameter inputs to the solver have been changed to be D-Wave formatted (e.g. `answer_mode` instead of `resultFormat`).
+[Linked](https://github.com/aws/amazon-braket-ocean-plugin-python/blob/main/examples/braket_dwave_sampler_min_vertex.py) is the same example as above of solving the minimum vertex cover problem. Only the parameter inputs to the solver have been changed to be D-Wave formatted (e.g. `answer_mode` instead of `resultFormat`).
 
 These usage examples can be found as python scripts in the `BRAKET_OCEAN_PLUGIN_ROOT/examples/` folder.
 
