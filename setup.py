@@ -23,12 +23,7 @@ setup(
     python_requires=">= 3.7",
     packages=find_namespace_packages(where="src", exclude=("test",)),
     package_dir={"": "src"},
-    install_requires=[
-        "amazon-braket-sdk @ git+https://github.com/aws/amazon-braket-sdk-python.git",
-        "dimod>=0.8.13",
-        "boto3",
-        "boltons",
-    ],
+    install_requires=["amazon-braket-sdk", "dimod>=0.8.13", "boto3", "boltons"],
     extras_require={
         "test": [
             "black",
