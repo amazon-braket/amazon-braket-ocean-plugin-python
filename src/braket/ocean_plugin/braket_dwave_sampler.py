@@ -168,7 +168,7 @@ class BraketDWaveSampler(BraketSampler):
 
             >>> from braket.ocean_plugin import BraketDWaveSampler
             >>> sampler = BraketDWaveSampler(s3_destination_folder)
-            >>> task = sampler.sample_ising_quantum_task({0: -1}, {}, answer_mode="HISTOGRAM")
+            >>> task = sampler.sample_ising_quantum_task({0: -1, 1: 1}, {}, answer_mode="HISTOGRAM")
             >>> sampleset = BraketDWaveSampler.get_task_sample_set(task)
             >>> for sample in sampleset.samples():
             ...    print(sample)
@@ -201,7 +201,7 @@ class BraketDWaveSampler(BraketSampler):
             >>> for sample in sampleset.samples():
             ...    print(sample)
             ...
-            {0: 1, 1: -1}
+            {0: 1, 4: 0}
         """
         return super().sample_qubo(Q, **kwargs)
 
@@ -231,7 +231,7 @@ class BraketDWaveSampler(BraketSampler):
             >>> for sample in sampleset.samples():
             ...    print(sample)
             ...
-            {0: 1, 1: -1}
+            {0: 1, 4: 0}
         """
         return super().sample_qubo_quantum_task(Q, **kwargs)
 

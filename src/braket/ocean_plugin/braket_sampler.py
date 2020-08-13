@@ -66,10 +66,13 @@ class BraketSampler(Sampler, Structured):
         """
         FrozenDict[str, Any]: Solver properties in Braket boto3 response format
 
-        TODO: link boto3 docs
+        Please see `braket.device_schema` in amazon-braket-schemas-python_
+        for the key names of properties for a device.
 
         Solver properties are dependent on the selected solver and subject to change;
         for example, new released features may add properties.
+
+        .. _amazon-braket-schemas-python: https://github.com/aws/amazon-braket-schemas-python
         """
         mapping_dict = BraketSolverMetadata.get_metadata_by_arn(self._device_arn)["properties"]
         return_dict = {}
@@ -87,10 +90,13 @@ class BraketSampler(Sampler, Structured):
         keyword parameters in Braket format and values are lists of properties in
         :attr:`.BraketSampler.properties` for each key.
 
-        TODO: link boto3 docs
+        Please see `braket.device_schema` in amazon-braket-schemas-python_
+        for the key names of parameters for a device.
 
         Solver parameters are dependent on the selected solver and subject to change;
         for example, new released features may add parameters.
+
+        .. _amazon-braket-schemas-python: https://github.com/aws/amazon-braket-schemas-python
         """
         return FrozenDict(
             {
@@ -197,7 +203,7 @@ class BraketSampler(Sampler, Structured):
 
             >>> from braket.ocean_plugin import BraketSampler
             >>> sampler = BraketSampler(s3_destination_folder, BraketSamplerArns.DWAVE)
-            >>> task = sampler.sample_ising_quantum_task({0: -1}, {}, resultFormat="HISTOGRAM")
+            >>> task = sampler.sample_ising_quantum_task({0: 1, 1: 1}, {}, resultFormat="HISTOGRAM")
             >>> sampleset = BraketSampler.get_task_sample_set(task)
             >>> for sample in sampleset.samples():
             ...    print(sample)
@@ -251,7 +257,7 @@ class BraketSampler(Sampler, Structured):
             >>> for sample in sampleset.samples():
             ...    print(sample)
             ...
-            {0: 1, 1: -1}
+            {0: 1, 4: 0}
         """
         aws_task = self.sample_qubo_quantum_task(Q, **kwargs)
         variables = set().union(*Q)
@@ -287,7 +293,7 @@ class BraketSampler(Sampler, Structured):
             >>> for sample in sampleset.samples():
             ...    print(sample)
             ...
-            {0: 1, 1: -1}
+            {0: 1, 4: 0}
         """
         solver_kwargs = self._process_solver_kwargs(**kwargs)
 
