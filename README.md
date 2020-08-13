@@ -22,7 +22,7 @@ You can install from source by cloning this repository and running a pip install
 
 ```bash
 git clone https://github.com/aws/amazon-braket-ocean-plugin-python.git
-cd amazon-braket-ocean-plugin
+cd amazon-braket-ocean-plugin-python
 pip install .
 ```
 
