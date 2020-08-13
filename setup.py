@@ -13,6 +13,9 @@
 
 from setuptools import find_namespace_packages, setup
 
+with open("README.md", "r") as fh:
+    long_description = fh.read()
+
 with open("src/braket/ocean_plugin/_version.py") as f:
     version = f.readlines()[-1].split()[-1].strip("\"'")
 
@@ -41,4 +44,21 @@ setup(
             "dwave-ocean-sdk",
         ]
     },
+    url="https://github.com/aws/amazon-braket-ocean-plugin-python",
+    author="Amazon Web Services",
+    description=(
+        "An open source framework for interacting with D-Wave's Ocean library through Amazon Braket"
+    ),
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+    keywords="Amazon AWS Quantum",
+    classifiers=[
+        "Development Status :: 5 - Production/Stable",
+        "Intended Audience :: Developers",
+        "Natural Language :: English",
+        "License :: OSI Approved :: Apache Software License",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+    ],
 )
