@@ -40,6 +40,7 @@ setup(
             "pytest-xdist",
             "sphinx",
             "sphinx-rtd-theme",
+            "sphinxcontrib-apidoc",
             "tox",
             "dwave-ocean-sdk",
         ]
