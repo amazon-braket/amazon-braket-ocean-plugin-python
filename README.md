@@ -48,6 +48,8 @@ or alternatively from within Python:
 
 ## Documentation
 
+Detailed documentation, including the API reference, can be found on [Read the Docs](https://amazon-braket-ocean-plugin-python.readthedocs.io/en/latest/).
+
 **To generate the API Reference HTML in your local environment**
 
 First, you must have tox installed.
