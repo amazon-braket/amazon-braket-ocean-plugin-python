@@ -1,4 +1,4 @@
-## Amazon Braket Ocean Plugin
+# Amazon Braket Ocean Plugin
 
 [![Latest Version](https://img.shields.io/pypi/v/amazon-braket-ocean-plugin.svg)](https://pypi.python.org/pypi/amazon-braket-ocean-plugin)
 [![Supported Python Versions](https://img.shields.io/pypi/pyversions/amazon-braket-ocean-plugin.svg)](https://pypi.python.org/pypi/amazon-braket-ocean-plugin)
