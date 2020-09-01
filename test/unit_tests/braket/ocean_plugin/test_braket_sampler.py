@@ -148,7 +148,9 @@ def test_sample_qubo_value_error(braket_sampler):
     braket_sampler.sample_qubo({(0, 0): 0}, unsupported="hi")
 
 
-def test_get_task_sample_set_variables(s3_qubo_result,):
+def test_get_task_sample_set_variables(
+    s3_qubo_result,
+):
     s3_dict = json.loads(s3_qubo_result)
     del s3_dict["additionalMetadata"]["dwaveMetadata"]
     task = Mock()
@@ -165,7 +167,9 @@ def test_get_task_sample_active_variables(s3_qubo_result, active_variables):
     assert list(actual.variables) == active_variables
 
 
-def test_get_task_sample_no_active_variables(s3_qubo_result,):
+def test_get_task_sample_no_active_variables(
+    s3_qubo_result,
+):
     s3_dict = json.loads(s3_qubo_result)
     del s3_dict["additionalMetadata"]["dwaveMetadata"]
     s3_dict["variableCount"] = 3
