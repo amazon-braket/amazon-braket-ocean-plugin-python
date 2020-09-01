@@ -272,7 +272,13 @@ def sample_ising_common_testing(
 
 
 def sample_qubo_quantum_task_common_testing(
-    sampler, s3_qubo_result, s3_destination_folder, device_parameters, sample_kwargs, shots, logger,
+    sampler,
+    s3_qubo_result,
+    s3_destination_folder,
+    device_parameters,
+    sample_kwargs,
+    shots,
+    logger,
 ):
     """Common testing of sample_qubo_quantum_task for Braket samplers"""
     task = Mock()
