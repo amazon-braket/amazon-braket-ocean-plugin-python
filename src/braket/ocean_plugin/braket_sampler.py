@@ -153,7 +153,7 @@ class BraketSampler(Sampler, Structured):
             0 and 1.
 
             >>> from braket.ocean_plugin import BraketSampler
-            >>> sampler = BraketSampler(s3_destination_folder, BraketSamplerArns.DWAVE)
+            >>> sampler = BraketSampler(s3_destination_folder, "device_arn_1")
             >>> sampleset = sampler.sample_ising({0: -1, 1: 1}, {}, resultFormat="HISTOGRAM")
             >>> for sample in sampleset.samples():
             ...    print(sample)
@@ -202,7 +202,7 @@ class BraketSampler(Sampler, Structured):
             0 and 1.
 
             >>> from braket.ocean_plugin import BraketSampler
-            >>> sampler = BraketSampler(s3_destination_folder, BraketSamplerArns.DWAVE)
+            >>> sampler = BraketSampler(s3_destination_folder, "device_arn_1")
             >>> task = sampler.sample_ising_quantum_task({0: 1, 1: 1}, {}, resultFormat="HISTOGRAM")
             >>> sampleset = BraketSampler.get_task_sample_set(task)
             >>> for sample in sampleset.samples():
@@ -251,7 +251,7 @@ class BraketSampler(Sampler, Structured):
             0 and 4 on a sampler
 
             >>> from braket.ocean_plugin import BraketSampler
-            >>> sampler = BraketSampler(s3_destination_folder, BraketSamplerArns.DWAVE)
+            >>> sampler = BraketSampler(s3_destination_folder, "device_arn_1")
             >>> Q = {(0, 0): -1, (4, 4): -1, (0, 4): 2}
             >>> sampleset = sampler.sample_qubo(Q, postprocessingType="SAMPLING", shots=100)
             >>> for sample in sampleset.samples():
@@ -286,7 +286,7 @@ class BraketSampler(Sampler, Structured):
             0 and 4 on a sampler
 
             >>> from braket.ocean_plugin import BraketSampler
-            >>> sampler = BraketSampler(s3_destination_folder, BraketSamplerArns.DWAVE)
+            >>> sampler = BraketSampler(s3_destination_folder, "device_arn_1")
             >>> Q = {(0, 0): -1, (4, 4): -1, (0, 4): 2}
             >>> task = sampler.sample_qubo_quantum_task(Q, resultFormat="HISTOGRAM", shots=100)
             >>> sampleset = BraketSampler.get_task_sample_set(task)
