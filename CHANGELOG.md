@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.1.post0 (2020-09-09)
+
+### Testing and Release Infrastructure
+
+ * Add CHANGELOG.md
+
 ## v1.0.1 (2020-09-09)
 
 ## Bug Fixes and Other Changes
