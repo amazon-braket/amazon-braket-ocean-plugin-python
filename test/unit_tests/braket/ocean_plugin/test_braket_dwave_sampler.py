@@ -62,14 +62,31 @@ def braket_dwave_sampler(
 
 
 @patch("braket.ocean_plugin.braket_sampler.AwsDevice")
+@patch("braket.ocean_plugin.braket_dwave_sampler.AwsDevice")
 def test_default_device_arn(
-    mock_qpu, braket_sampler_properties, s3_destination_folder, logger, dwave_arn
+    dwave_sampler_mock_qpu,
+    sampler_mock_qpu,
+    braket_sampler_properties,
+    s3_destination_folder,
+    logger,
+    dwave_arn,
 ):
-    mock_qpu.return_value.properties = braket_sampler_properties
+    mock_device = Mock()
+    mock_device.arn = dwave_arn
+    dwave_sampler_mock_qpu.get_devices.return_value = [mock_device]
+    sampler_mock_qpu.return_value.properties = braket_sampler_properties
     sampler = BraketDWaveSampler(s3_destination_folder, None, Mock(), logger)
     assert isinstance(sampler, BraketSampler)
     assert sampler._device_arn == dwave_arn
-    # TODO: replace with test for call to API to get default ARN
+
+
+@pytest.mark.xfail(raises=RuntimeError)
+@patch("braket.ocean_plugin.braket_dwave_sampler.AwsDevice")
+def test_default_device_arn_error(dwave_sampler_mock_qpu, s3_destination_folder, logger, dwave_arn):
+    mock_device = Mock()
+    mock_device.arn = dwave_arn
+    dwave_sampler_mock_qpu.get_devices.return_value = []
+    BraketDWaveSampler(s3_destination_folder, None, Mock(), logger)
 
 
 def test_parameters(braket_dwave_sampler):

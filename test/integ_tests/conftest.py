@@ -18,12 +18,12 @@ import dwavebinarycsp as dbc
 import pytest
 from botocore.exceptions import ClientError
 
-from braket.aws.aws_session import AwsSession
+from braket.aws import AwsDevice, AwsSession
 
 
 @pytest.fixture
 def dwave_arn():
-    return "arn:aws:braket:::device/qpu/d-wave/DW_2000Q_6"
+    return AwsDevice.get_devices(provider_names=["D-Wave Systems"], statuses=["ONLINE"])[0].arn
 
 
 @pytest.fixture(scope="session")

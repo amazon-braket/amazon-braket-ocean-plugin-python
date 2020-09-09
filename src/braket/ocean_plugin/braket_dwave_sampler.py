@@ -21,7 +21,7 @@ from typing import Any, Dict, List, Tuple, Union
 from boltons.dictutils import FrozenDict
 from dimod import SampleSet
 
-from braket.aws import AwsSession
+from braket.aws import AwsDevice, AwsSession
 from braket.ocean_plugin.braket_sampler import BraketSampler
 from braket.ocean_plugin.braket_solver_metadata import BraketSolverMetadata
 from braket.tasks import QuantumTask
@@ -53,9 +53,12 @@ class BraketDWaveSampler(BraketSampler):
         logger: Logger = getLogger(__name__),
     ):
         if not device_arn:
-            # TODO: replace with call to programmatically use the API to get this
-            # once the API is ready
-            device_arn = "arn:aws:braket:::device/qpu/d-wave/DW_2000Q_6"
+            try:
+                device_arn = AwsDevice.get_devices(
+                    provider_names=["D-Wave Systems"], statuses=["ONLINE"]
+                )[0].arn
+            except IndexError:
+                raise RuntimeError("No D-Wave devices online")
         super().__init__(s3_destination_folder, device_arn, aws_session, logger)
 
     @property
