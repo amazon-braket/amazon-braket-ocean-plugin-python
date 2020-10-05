@@ -16,7 +16,6 @@ import os
 import boto3
 import dwavebinarycsp as dbc
 import pytest
-from botocore.exceptions import ClientError
 
 from braket.aws import AwsDevice, AwsSession
 
@@ -50,20 +49,10 @@ def s3_bucket(s3_resource, boto_session):
     account_id = boto_session.client("sts").get_caller_identity()["Account"]
     bucket_name = f"amazon-braket-ocean-plugin-integ-tests-{account_id}"
     bucket = s3_resource.Bucket(bucket_name)
+    bucket.load()
 
-    try:
+    if not bucket.creation_date:
         bucket.create(ACL="private", CreateBucketConfiguration={"LocationConstraint": region_name})
-    except ClientError as e:
-        code = e.response["Error"]["Code"]
-
-        # Bucket exists in profile region
-        if code == "BucketAlreadyOwnedByYou":
-            pass
-        # Bucket exists in another region
-        elif code == "IllegalLocationConstraintException" and bucket.creation_date:
-            pass
-        else:
-            raise e
 
     return bucket_name
 
