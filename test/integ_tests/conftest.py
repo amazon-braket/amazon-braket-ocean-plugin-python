@@ -49,6 +49,7 @@ def s3_bucket(s3_resource, boto_session):
     account_id = boto_session.client("sts").get_caller_identity()["Account"]
     bucket_name = f"amazon-braket-ocean-plugin-integ-tests-{account_id}"
     bucket = s3_resource.Bucket(bucket_name)
+    bucket.load()
 
     if not bucket.creation_date:
         bucket.create(ACL="private", CreateBucketConfiguration={"LocationConstraint": region_name})
