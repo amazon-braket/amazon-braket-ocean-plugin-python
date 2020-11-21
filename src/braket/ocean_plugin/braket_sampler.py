@@ -216,9 +216,9 @@ class BraketSampler(Sampler, Structured):
             h = dict((v, b) for v, b in enumerate(h) if b or v in self.nodelist)
 
         edges = self.edgelist
+        sorted_edges = tuple(sorted(set((u, v) if u < v else (v, u) for u, v in J)))
         if not (
-            all(v in self.nodelist for v in h)
-            and all((u, v) in edges or (v, u) in edges for u, v in J)
+            all(v in self.nodelist for v in h) and all((u, v) in edges for u, v in sorted_edges)
         ):
             raise BinaryQuadraticModelStructureError("Problem graph incompatible with solver.")
 
@@ -297,9 +297,9 @@ class BraketSampler(Sampler, Structured):
         """
         solver_kwargs = self._process_solver_kwargs(**kwargs)
 
+        sorted_edges = tuple(sorted(set((u, v) if u < v else (v, u) for u, v in Q)))
         if not all(
-            u in self.nodelist if u == v else ((u, v) in self.edgelist or (v, u) in self.edgelist)
-            for u, v in Q
+            u in self.nodelist if u == v else (u, v) in self.edgelist for u, v in sorted_edges
         ):
             raise BinaryQuadraticModelStructureError("Problem graph incompatible with solver.")
 
