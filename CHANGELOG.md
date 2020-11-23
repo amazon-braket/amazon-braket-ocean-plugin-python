@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.0.2 (2020-11-23)
+
+### Bug Fixes and Other Changes
+
+ * Optimized graph validation
+ * Leaner graph validation
+
 ## v1.0.1.post3 (2020-10-30)
 
 ### Testing and Release Infrastructure
