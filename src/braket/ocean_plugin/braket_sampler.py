@@ -15,18 +15,19 @@
 from __future__ import annotations
 
 import copy
+from collections import defaultdict
 from functools import lru_cache
 from logging import Logger, getLogger
-from typing import Any, Dict, List, Set, Tuple, Union
+from typing import Any, Dict, FrozenSet, List, Set, Tuple, Union
 
 from boltons.dictutils import FrozenDict
+from braket.annealing.problem import Problem, ProblemType
+from braket.aws import AwsDevice, AwsSession
+from braket.tasks import AnnealingQuantumTaskResult, QuantumTask
 from dimod import BINARY, SPIN, Sampler, SampleSet, Structured
 from dimod.exceptions import BinaryQuadraticModelStructureError
 
-from braket.annealing.problem import Problem, ProblemType
-from braket.aws import AwsDevice, AwsSession
 from braket.ocean_plugin.braket_solver_metadata import BraketSolverMetadata
-from braket.tasks import AnnealingQuantumTaskResult, QuantumTask
 
 
 class BraketSampler(Sampler, Structured):
@@ -111,7 +112,7 @@ class BraketSampler(Sampler, Structured):
     @lru_cache(maxsize=1)
     def nodelist(self) -> Tuple[int]:
         """Tuple[int]: Tuple of active qubits for the solver."""
-        return tuple(sorted(set(self.properties["qubits"])))
+        return tuple(sorted(self._access_optimized_nodelist()))
 
     @property
     @lru_cache(maxsize=1)
@@ -120,6 +121,26 @@ class BraketSampler(Sampler, Structured):
         return tuple(
             sorted(set((u, v) if u < v else (v, u) for u, v in self.properties["couplers"]))
         )
+
+    @lru_cache(maxsize=1)
+    def _access_optimized_nodelist(self) -> FrozenSet[int]:
+        """FrozenSet[int]: FrozenSet of active qubits for the solver.
+
+        Returning a frozen set allows for near constant existence checks.
+        """
+        return frozenset(self.properties["qubits"])
+
+    @lru_cache(maxsize=1)
+    def _access_optimized_edgelist(self) -> FrozenDict[int, FrozenSet[int]]:
+        """FrozenDict[int, FrozenSet[int]]: FrozenDict of active couplers for the solver.
+
+        Returning a frozen dict allows for near constant existence checks.
+        """
+        edges = defaultdict(set)
+        for (u, v) in self.properties["couplers"]:
+            edges[u].add(v)
+        edges[u] = frozenset(edges[u])
+        return FrozenDict(edges)
 
     def sample_ising(
         self, h: Union[Dict[int, int], List[int]], J: Dict[int, int], **kwargs
@@ -162,7 +183,7 @@ class BraketSampler(Sampler, Structured):
         """
 
         if isinstance(h, list):
-            h = dict((v, b) for v, b in enumerate(h) if b or v in self.nodelist)
+            h = dict((v, b) for v, b in enumerate(h) if b or v in self._access_optimized_nodelist())
 
         aws_task = self.sample_ising_quantum_task(h, J, **kwargs)
         variables = set(h).union(*J)
@@ -213,12 +234,12 @@ class BraketSampler(Sampler, Structured):
         solver_kwargs = self._process_solver_kwargs(**kwargs)
 
         if isinstance(h, list):
-            h = dict((v, b) for v, b in enumerate(h) if b or v in self.nodelist)
+            h = dict((v, b) for v, b in enumerate(h) if b or v in self._access_optimized_nodelist())
 
-        edges = self.edgelist
-        sorted_edges = tuple(sorted(set((u, v) if u < v else (v, u) for u, v in J)))
+        sorted_edges = frozenset((u, v) if u < v else (v, u) for u, v in J)
         if not (
-            all(v in self.nodelist for v in h) and all((u, v) in edges for u, v in sorted_edges)
+            all(v in self._access_optimized_nodelist() for v in h)
+            and all(v in self._access_optimized_edgelist()[u] for u, v in sorted_edges)
         ):
             raise BinaryQuadraticModelStructureError("Problem graph incompatible with solver.")
 
@@ -297,9 +318,12 @@ class BraketSampler(Sampler, Structured):
         """
         solver_kwargs = self._process_solver_kwargs(**kwargs)
 
-        sorted_edges = tuple(sorted(set((u, v) if u < v else (v, u) for u, v in Q)))
+        sorted_edges = frozenset((u, v) if u < v else (v, u) for u, v in Q)
         if not all(
-            u in self.nodelist if u == v else (u, v) in self.edgelist for u, v in sorted_edges
+            u in self._access_optimized_nodelist()
+            if u == v
+            else v in self._access_optimized_edgelist()[u]
+            for u, v in sorted_edges
         ):
             raise BinaryQuadraticModelStructureError("Problem graph incompatible with solver.")
 
