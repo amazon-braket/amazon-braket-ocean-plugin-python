@@ -96,36 +96,47 @@ pip install -e "amazon-braket-ocean-plugin-python[test]"
 ```
 
 ### Unit Tests
+
+To run the unit tests:
+
 ```bash
 tox -e unit-tests
 ```
 
-To run an individual test
-```
-tox -e unit-tests -- -k 'your_test'
+You can also pass in various pytest arguments to run selected tests:
+
+```bash
+tox -e unit-tests -- your-arguments
 ```
 
-To run linters and doc generators and unit tests
+For more information, please see [pytest usage](https://docs.pytest.org/en/stable/usage.html).
+
+To run linters and doc generators and unit tests:
+
 ```bash
 tox
 ```
 
 ### Integration Tests
+
 Set the `AWS_PROFILE`, as instructed in the amazon-braket-sdk-python [README](https://github.com/aws/amazon-braket-sdk-python/blob/main/README.md).
+
 ```bash
-export AWS_PROFILE=Your_Profile_Name
+export AWS_PROFILE=YOUR_PROFILE_NAME
 ```
 
 Running the integration tests will create an S3 bucket in the same account as the `AWS_PROFILE` with the following naming convention `amazon-braket-ocean-plugin-integ-tests-{account_id}`.
 
-Run the tests
+Run the tests:
+
 ```bash
 tox -e integ-tests
 ```
 
-To run an individual test
+As with unit tests, you can also pass in various pytest arguments:
+
 ```bash
-tox -e integ-tests -- -k 'your_test'
+tox -e integ-tests -- your-arguments
 ```
 
 ## License
