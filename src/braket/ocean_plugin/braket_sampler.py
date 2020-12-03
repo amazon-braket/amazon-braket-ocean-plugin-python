@@ -21,13 +21,13 @@ from logging import Logger, getLogger
 from typing import Any, Dict, FrozenSet, List, Set, Tuple, Union
 
 from boltons.dictutils import FrozenDict
-from braket.annealing.problem import Problem, ProblemType
-from braket.aws import AwsDevice, AwsSession
-from braket.tasks import AnnealingQuantumTaskResult, QuantumTask
 from dimod import BINARY, SPIN, Sampler, SampleSet, Structured
 from dimod.exceptions import BinaryQuadraticModelStructureError
 
+from braket.annealing.problem import Problem, ProblemType
+from braket.aws import AwsDevice, AwsSession
 from braket.ocean_plugin.braket_solver_metadata import BraketSolverMetadata
+from braket.tasks import AnnealingQuantumTaskResult, QuantumTask
 
 
 class BraketSampler(Sampler, Structured):
