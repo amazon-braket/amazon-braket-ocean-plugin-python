@@ -2,8 +2,9 @@
 
 [![Latest Version](https://img.shields.io/pypi/v/amazon-braket-ocean-plugin.svg)](https://pypi.python.org/pypi/amazon-braket-ocean-plugin)
 [![Supported Python Versions](https://img.shields.io/pypi/pyversions/amazon-braket-ocean-plugin.svg)](https://pypi.python.org/pypi/amazon-braket-ocean-plugin)
-[![Code Style: Black](https://img.shields.io/badge/code_style-black-000000.svg)](https://github.com/psf/black)
+[![Build Status](https://img.shields.io/github/workflow/status/aws/amazon-braket-ocean-plugin-python/Python%20package/main?logo=github)](https://github.com/aws/amazon-braket-ocean-plugin-python/actions?query=workflow%3A%22Python+package%22)
 [![Documentation Status](https://readthedocs.org/projects/amazon-braket-ocean-plugin-python/badge/?version=latest)](https://amazon-braket-ocean-plugin-python.readthedocs.io/en/latest/?badge=latest)
+[![Code Style: Black](https://img.shields.io/badge/code_style-black-000000.svg)](https://github.com/psf/black)
 
 The Amazon Braket Ocean Plugin is an open source library in Python that provides a framework that you can use to interact with Ocean tools on top of Amazon Braket.
 
