@@ -3,6 +3,7 @@
 [![Latest Version](https://img.shields.io/pypi/v/amazon-braket-ocean-plugin.svg)](https://pypi.python.org/pypi/amazon-braket-ocean-plugin)
 [![Supported Python Versions](https://img.shields.io/pypi/pyversions/amazon-braket-ocean-plugin.svg)](https://pypi.python.org/pypi/amazon-braket-ocean-plugin)
 [![Build Status](https://img.shields.io/github/workflow/status/aws/amazon-braket-ocean-plugin-python/Python%20package/main?logo=github)](https://github.com/aws/amazon-braket-ocean-plugin-python/actions?query=workflow%3A%22Python+package%22)
+[![codecov](https://codecov.io/gh/aws/amazon-braket-ocean-plugin-python/branch/main/graph/badge.svg?token=NVBIB4BUX3)](https://codecov.io/gh/aws/amazon-braket-ocean-plugin-python)
 [![Documentation Status](https://img.shields.io/readthedocs/amazon-braket-ocean-plugin-python.svg?logo=read-the-docs)](https://amazon-braket-ocean-plugin-python.readthedocs.io/en/latest/?badge=latest)
 [![Code Style: Black](https://img.shields.io/badge/code_style-black-000000.svg)](https://github.com/psf/black)
 
