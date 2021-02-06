@@ -77,8 +77,11 @@ def test_nodelist(braket_sampler):
 
 
 @pytest.mark.xfail(raises=BinaryQuadraticModelStructureError)
-def test_sample_ising_bqm_structure_error(braket_sampler):
-    braket_sampler.sample_ising({0: -1, 500: 1}, {})
+@pytest.mark.parametrize(
+    "h, J", [({0: -1, 500: 1}, {}), ({0: -1, 1: 1}, {(0, 1): 3}), ({0: -1, 2: 1}, {(3, 500): 3})]
+)
+def test_sample_ising_bqm_structure_error(braket_sampler, h, J):
+    braket_sampler.sample_ising(h, J)
 
 
 @pytest.mark.xfail(raises=ValueError)
@@ -139,8 +142,9 @@ def test_sample_ising_quantum_task_success(
 
 
 @pytest.mark.xfail(raises=BinaryQuadraticModelStructureError)
-def test_sample_qubo_bqm_structure_error(braket_sampler):
-    braket_sampler.sample_qubo({(1, 500): 0})
+@pytest.mark.parametrize("Q", [{(1, 500): 0}, {(0, 1): 0}, {(500, 500): 0}])
+def test_sample_qubo_bqm_structure_error(braket_sampler, Q):
+    braket_sampler.sample_qubo(Q)
 
 
 @pytest.mark.xfail(raises=ValueError)
