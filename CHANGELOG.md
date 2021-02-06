@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.3 (2021-02-06)
+
+### Bug Fixes and Other Changes
+
+ * Throw BinaryQuadraticModelStructureError on bad edges
+
 ## v1.0.2.post2 (2021-01-12)
 
 ### Testing and Release Infrastructure
