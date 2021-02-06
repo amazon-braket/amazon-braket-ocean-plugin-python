@@ -191,7 +191,7 @@ class BraketSampler(Sampler, Structured):
         return BraketSampler.get_task_sample_set(aws_task, variables)
 
     def sample_ising_quantum_task(
-        self, h: Union[Dict[int, int], List[int]], J: Dict[int, int], **kwargs
+        self, h: Union[Dict[int, int], List[int]], J: Dict[Tuple[int, int], float], **kwargs
     ) -> QuantumTask:
         """
         Sample from the specified Ising model and return a `QuantumTask`. This has the same inputs
@@ -239,7 +239,7 @@ class BraketSampler(Sampler, Structured):
         sorted_edges = frozenset((u, v) if u < v else (v, u) for u, v in J)
         if not (
             all(v in self._access_optimized_nodelist() for v in h)
-            and all(v in self._access_optimized_edgelist()[u] for u, v in sorted_edges)
+            and all(v in self._access_optimized_edgelist().get(u, ()) for u, v in sorted_edges)
         ):
             raise BinaryQuadraticModelStructureError("Problem graph incompatible with solver.")
 
@@ -322,7 +322,7 @@ class BraketSampler(Sampler, Structured):
         if not all(
             u in self._access_optimized_nodelist()
             if u == v
-            else v in self._access_optimized_edgelist()[u]
+            else v in self._access_optimized_edgelist().get(u, ())
             for u, v in sorted_edges
         ):
             raise BinaryQuadraticModelStructureError("Problem graph incompatible with solver.")

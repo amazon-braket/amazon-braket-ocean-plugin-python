@@ -142,7 +142,7 @@ class BraketDWaveSampler(BraketSampler):
         return super().sample_ising(h, J, **kwargs)
 
     def sample_ising_quantum_task(
-        self, h: Union[Dict[int, int], List[int]], J: Dict[int, int], **kwargs
+        self, h: Union[Dict[int, int], List[int]], J: Dict[Tuple[int, int], float], **kwargs
     ) -> QuantumTask:
         """
         Sample from the specified Ising model and return a `QuantumTask`. This has the same inputs
