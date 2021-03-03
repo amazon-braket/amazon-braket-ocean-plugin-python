@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.3.post0 (2021-03-03)
+
+### Testing and Release Infrastructure
+
+ * Use main instead of PyPi for build dependencies
+
 ## v1.0.3 (2021-02-06)
 
 ### Bug Fixes and Other Changes
