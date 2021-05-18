@@ -20,14 +20,15 @@ from functools import lru_cache
 from logging import Logger, getLogger
 from typing import Any, Dict, FrozenSet, List, Set, Tuple, Union
 
+import jsonref
 from boltons.dictutils import FrozenDict
+from braket.annealing.problem import Problem, ProblemType
+from braket.aws import AwsDevice, AwsSession
+from braket.tasks import AnnealingQuantumTaskResult, QuantumTask
 from dimod import BINARY, SPIN, Sampler, SampleSet, Structured
 from dimod.exceptions import BinaryQuadraticModelStructureError
 
-from braket.annealing.problem import Problem, ProblemType
-from braket.aws import AwsDevice, AwsSession
 from braket.ocean_plugin.braket_solver_metadata import BraketSolverMetadata
-from braket.tasks import AnnealingQuantumTaskResult, QuantumTask
 
 
 class BraketSampler(Sampler, Structured):
@@ -99,12 +100,15 @@ class BraketSampler(Sampler, Structured):
 
         .. _amazon-braket-schemas-python: https://github.com/aws/amazon-braket-schemas-python
         """
+        dereffed = jsonref.loads(jsonref.dumps(self.solver.properties.deviceParameters))
+        device_level_parameters = dereffed["properties"]["deviceLevelParameters"]["properties"]
         return FrozenDict(
             {
                 param: ["parameters"]
                 for param in BraketSolverMetadata.get_metadata_by_arn(self._device_arn)[
                     "parameters"
                 ].values()
+                if param in device_level_parameters or param == "shots"
             }
         )
 

@@ -72,7 +72,7 @@ class BraketSolverMetadata(dict, Enum):
             },
             "service": {"shotsRange": "num_reads_range"},
         },
-        "device_parameters_key_name": "providerLevelParameters",
+        "device_parameters_key_name": "deviceLevelParameters",
     }
 
     @staticmethod

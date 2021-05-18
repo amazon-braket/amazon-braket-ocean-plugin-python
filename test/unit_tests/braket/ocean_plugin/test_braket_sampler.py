@@ -17,6 +17,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 from boltons.dictutils import FrozenDict
+from braket.tasks import AnnealingQuantumTaskResult
 from conftest import (
     sample_ising_common_testing,
     sample_ising_quantum_task_common_testing,
@@ -26,7 +27,6 @@ from conftest import (
 from dimod.exceptions import BinaryQuadraticModelStructureError
 
 from braket.ocean_plugin import BraketSampler, BraketSolverMetadata
-from braket.tasks import AnnealingQuantumTaskResult
 
 
 @pytest.fixture
@@ -54,12 +54,34 @@ def braket_sampler(mock_qpu, braket_sampler_properties, s3_destination_folder, l
     return sampler
 
 
+@pytest.fixture
+@patch("braket.ocean_plugin.braket_sampler.AwsDevice")
+def advantage_braket_sampler(
+    mock_qpu, advantage_braket_sampler_properties, s3_destination_folder, logger, dwave_arn
+):
+    mock_qpu.return_value.properties = advantage_braket_sampler_properties
+    sampler = BraketSampler(s3_destination_folder, dwave_arn, Mock(), logger)
+    return sampler
+
+
 def test_parameters(braket_sampler):
     expected_params = {
         param: ["parameters"] for param in BraketSolverMetadata.DWAVE["parameters"].values()
     }
     assert braket_sampler.parameters == expected_params
     assert isinstance(braket_sampler.parameters, FrozenDict)
+
+
+def test_advantage_parameters(advantage_braket_sampler):
+    expected_params = {
+        param: ["parameters"] for param in BraketSolverMetadata.DWAVE["parameters"].values()
+    }
+    del expected_params["beta"]
+    del expected_params["chains"]
+    del expected_params["postprocessingType"]
+
+    assert advantage_braket_sampler.parameters == expected_params
+    assert isinstance(advantage_braket_sampler.parameters, FrozenDict)
 
 
 def test_properties(braket_sampler, provider_properties, service_properties):

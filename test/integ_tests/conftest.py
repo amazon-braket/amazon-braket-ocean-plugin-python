@@ -17,7 +17,6 @@ import boto3
 import dwavebinarycsp as dbc
 import pytest
 from botocore.exceptions import ClientError
-
 from braket.aws import AwsDevice, AwsSession
 
 
