@@ -15,9 +15,14 @@ import json
 import logging
 from unittest.mock import Mock
 
+import jsonref
 import pytest
 from braket.annealing.problem import Problem, ProblemType
-from braket.device_schema.dwave import DwaveDeviceCapabilities
+from braket.device_schema.dwave import (
+    Dwave2000QDeviceParameters,
+    DwaveAdvantageDeviceParameters,
+    DwaveDeviceCapabilities,
+)
 from braket.tasks import AnnealingQuantumTaskResult
 from dimod import BINARY, SPIN, SampleSet
 
@@ -67,180 +72,12 @@ def provider_properties():
 
 @pytest.fixture
 def two_thousand_q_device_parameters():
-    return {
-        "title": "Dwave2000QDeviceParameters",
-        "properties": {
-            "deviceLevelParameters": {
-                "properties": {
-                    "braketSchemaHeader": {
-                        "title": "Braketschemaheader",
-                        "const": {
-                            "name": "braket.device_schema.dwave."
-                            "dwave_2000Q_device_level_parameters",
-                            "version": "1",
-                        },
-                    },
-                    "annealingOffsets": {
-                        "title": "Annealingoffsets",
-                        "type": ["array", "null"],
-                        "items": {"type": "number"},
-                    },
-                    "annealingSchedule": {
-                        "title": "Annealingschedule",
-                        "type": ["array", "null"],
-                        "items": {"type": "array", "items": {"type": "number"}},
-                    },
-                    "annealingDuration": {
-                        "title": "Annealingduration",
-                        "exclusiveMinimum": 1,
-                        "type": ["integer", "null"],
-                    },
-                    "autoScale": {"title": "Autoscale", "type": ["boolean", "null"]},
-                    "beta": {"title": "Beta", "type": ["number", "null"]},
-                    "chains": {
-                        "title": "Chains",
-                        "type": ["array", "null"],
-                        "items": {"type": "array", "items": {"type": "integer"}},
-                    },
-                    "compensateFluxDrift": {
-                        "title": "Compensatefluxdrift",
-                        "type": ["boolean", "null"],
-                    },
-                    "fluxBiases": {
-                        "title": "Fluxbiases",
-                        "type": ["array", "null"],
-                        "items": {"type": "number"},
-                    },
-                    "initialState": {
-                        "title": "Initialstate",
-                        "type": ["array", "null"],
-                        "items": {"type": "integer"},
-                    },
-                    "maxResults": {
-                        "title": "Maxresults",
-                        "exclusiveMinimum": 1,
-                        "type": ["integer", "null"],
-                    },
-                    "postprocessingType": {
-                        "title": "PostProcessingType",
-                        "description": "The type of processing for D-Wave.",
-                        "enum": ["SAMPLING", "OPTIMIZATION"],
-                        "type": "string",
-                    },
-                    "programmingThermalizationDuration": {
-                        "title": "Programmingthermalizationduration",
-                        "type": ["integer", "null"],
-                    },
-                    "readoutThermalizationDuration": {
-                        "title": "Readoutthermalizationduration",
-                        "type": ["integer", "null"],
-                    },
-                    "reduceIntersampleCorrelation": {
-                        "title": "Reduceintersamplecorrelation",
-                        "type": ["boolean", "null"],
-                    },
-                    "reinitializeState": {
-                        "title": "Reinitializestate",
-                        "type": ["boolean", "null"],
-                    },
-                    "resultFormat": {
-                        "title": "ResultFormat",
-                        "description": "The type of results format for D-Wave.",
-                        "enum": ["RAW", "HISTOGRAM"],
-                        "type": "string",
-                    },
-                    "spinReversalTransformCount": {
-                        "title": "Spinreversaltransformcount",
-                        "exclusiveMinimum": 0,
-                        "type": ["integer", "null"],
-                    },
-                }
-            }
-        },
-    }
+    return jsonref.loads(Dwave2000QDeviceParameters.schema_json())
 
 
 @pytest.fixture
 def advantage_device_parameters():
-    return {
-        "title": "DwaveAdvantageDeviceParameters",
-        "properties": {
-            "deviceLevelParameters": {
-                "properties": {
-                    "braketSchemaHeader": {
-                        "title": "Braketschemaheader",
-                        "const": {
-                            "name": "braket.device_schema.dwave."
-                            "dwave_advantage_device_level_parameters",
-                            "version": "1",
-                        },
-                    },
-                    "annealingOffsets": {
-                        "title": "Annealingoffsets",
-                        "type": ["array", "null"],
-                        "items": {"type": "number"},
-                    },
-                    "annealingSchedule": {
-                        "title": "Annealingschedule",
-                        "type": ["array", "null"],
-                        "items": {"type": "array", "items": {"type": "number"}},
-                    },
-                    "annealingDuration": {
-                        "title": "Annealingduration",
-                        "exclusiveMinimum": 1,
-                        "type": ["integer", "null"],
-                    },
-                    "autoScale": {"title": "Autoscale", "type": ["boolean", "null"]},
-                    "compensateFluxDrift": {
-                        "title": "Compensatefluxdrift",
-                        "type": ["boolean", "null"],
-                    },
-                    "fluxBiases": {
-                        "title": "Fluxbiases",
-                        "type": ["array", "null"],
-                        "items": {"type": "number"},
-                    },
-                    "initialState": {
-                        "title": "Initialstate",
-                        "type": ["array", "null"],
-                        "items": {"type": "integer"},
-                    },
-                    "maxResults": {
-                        "title": "Maxresults",
-                        "exclusiveMinimum": 1,
-                        "type": ["integer", "null"],
-                    },
-                    "programmingThermalizationDuration": {
-                        "title": "Programmingthermalizationduration",
-                        "type": ["integer", "null"],
-                    },
-                    "readoutThermalizationDuration": {
-                        "title": "Readoutthermalizationduration",
-                        "type": ["integer", "null"],
-                    },
-                    "reduceIntersampleCorrelation": {
-                        "title": "Reduceintersamplecorrelation",
-                        "type": ["boolean", "null"],
-                    },
-                    "reinitializeState": {
-                        "title": "Reinitializestate",
-                        "type": ["boolean", "null"],
-                    },
-                    "resultFormat": {
-                        "title": "ResultFormat",
-                        "description": "The type of results format for D-Wave.",
-                        "enum": ["RAW", "HISTOGRAM"],
-                        "type": "string",
-                    },
-                    "spinReversalTransformCount": {
-                        "title": "Spinreversaltransformcount",
-                        "exclusiveMinimum": 0,
-                        "type": ["integer", "null"],
-                    },
-                }
-            }
-        },
-    }
+    return jsonref.loads(DwaveAdvantageDeviceParameters.schema_json())
 
 
 @pytest.fixture
