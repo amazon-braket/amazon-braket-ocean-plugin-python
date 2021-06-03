@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.4 (2021-06-03)
+
+### Bug Fixes and Other Changes
+
+ * filter device parameters based on arn
+
 ## v1.0.3.post2 (2021-06-03)
 
 ### Testing and Release Infrastructure
