@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.3.post2 (2021-06-03)
+
+### Testing and Release Infrastructure
+
+ * Use GitHub source for tox tests
+
 ## v1.0.3.post1 (2021-03-11)
 
 ### Testing and Release Infrastructure
