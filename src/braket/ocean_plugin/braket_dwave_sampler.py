@@ -18,13 +18,14 @@ from functools import lru_cache
 from logging import Logger, getLogger
 from typing import Any, Dict, List, Tuple, Union
 
+import jsonref
 from boltons.dictutils import FrozenDict
+from braket.aws import AwsDevice, AwsSession
+from braket.tasks import QuantumTask
 from dimod import SampleSet
 
-from braket.aws import AwsDevice, AwsSession
 from braket.ocean_plugin.braket_sampler import BraketSampler
 from braket.ocean_plugin.braket_solver_metadata import BraketSolverMetadata
-from braket.tasks import QuantumTask
 
 
 class BraketDWaveSampler(BraketSampler):
@@ -95,12 +96,16 @@ class BraketDWaveSampler(BraketSampler):
         Solver parameters are dependent on the selected solver and subject to change;
         for example, new released features may add parameters.
         """
+        dereffed = jsonref.loads(jsonref.dumps(self.solver.properties.deviceParameters))
+        device_level_parameters = dereffed["properties"]["deviceLevelParameters"]["properties"]
         return FrozenDict(
             {
                 param: ["parameters"]
                 for param in BraketSolverMetadata.get_metadata_by_arn(self._device_arn)[
                     "parameters"
                 ]
+                if BraketSolverMetadata.DWAVE["parameters"].get(param) in device_level_parameters
+                or param == "num_reads"
             }
         )
 

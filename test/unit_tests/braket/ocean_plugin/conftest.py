@@ -15,12 +15,16 @@ import json
 import logging
 from unittest.mock import Mock
 
+import jsonref
 import pytest
-from dimod import BINARY, SPIN, SampleSet
-
 from braket.annealing.problem import Problem, ProblemType
-from braket.device_schema.dwave import DwaveDeviceCapabilities
+from braket.device_schema.dwave import (
+    Dwave2000QDeviceParameters,
+    DwaveAdvantageDeviceParameters,
+    DwaveDeviceCapabilities,
+)
 from braket.tasks import AnnealingQuantumTaskResult
+from dimod import BINARY, SPIN, SampleSet
 
 
 @pytest.fixture
@@ -67,7 +71,19 @@ def provider_properties():
 
 
 @pytest.fixture
-def braket_sampler_properties(provider_properties, service_properties):
+def two_thousand_q_device_parameters():
+    return jsonref.loads(Dwave2000QDeviceParameters.schema_json())
+
+
+@pytest.fixture
+def advantage_device_parameters():
+    return jsonref.loads(DwaveAdvantageDeviceParameters.schema_json())
+
+
+@pytest.fixture
+def braket_sampler_properties(
+    provider_properties, service_properties, two_thousand_q_device_parameters
+):
     return DwaveDeviceCapabilities.parse_obj(
         {
             "braketSchemaHeader": {
@@ -91,7 +107,39 @@ def braket_sampler_properties(provider_properties, service_properties):
                     "version": ["1"],
                 }
             },
-            "deviceParameters": {},
+            "deviceParameters": two_thousand_q_device_parameters,
+        }
+    )
+
+
+@pytest.fixture
+def advantage_braket_sampler_properties(
+    provider_properties, service_properties, advantage_device_parameters
+):
+    return DwaveDeviceCapabilities.parse_obj(
+        {
+            "braketSchemaHeader": {
+                "name": "braket.device_schema.dwave.dwave_device_capabilities",
+                "version": "1",
+            },
+            "provider": provider_properties,
+            "service": {
+                "executionWindows": [
+                    {
+                        "executionDay": "Everyday",
+                        "windowStartHour": "11:00",
+                        "windowEndHour": "12:00",
+                    }
+                ],
+                "shotsRange": service_properties["shotsRange"],
+            },
+            "action": {
+                "braket.ir.annealing.problem": {
+                    "actionType": "braket.ir.annealing.problem",
+                    "version": ["1"],
+                }
+            },
+            "deviceParameters": advantage_device_parameters,
         }
     )
 
