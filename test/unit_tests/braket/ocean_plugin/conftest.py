@@ -17,6 +17,7 @@ from unittest.mock import Mock
 
 import jsonref
 import pytest
+from jsonschema import validate
 from braket.annealing.problem import Problem, ProblemType
 from braket.device_schema.dwave import (
     Dwave2000QDeviceParameters,
@@ -39,8 +40,11 @@ def shots():
 
 @pytest.fixture
 def service_properties():
-    return {"shotsRange": (0, 10)}
+    return {"shotsRange": [0, 10]}
 
+@pytest.fixture
+def service_properties_list():
+    return {"shotsRange": (0, 10)}
 
 @pytest.fixture
 def provider_properties():
@@ -84,8 +88,7 @@ def advantage_device_parameters():
 def braket_sampler_properties(
     provider_properties, service_properties, two_thousand_q_device_parameters
 ):
-    return DwaveDeviceCapabilities.parse_obj(
-        {
+    d_wave_device_capabilities_json = {
             "braketSchemaHeader": {
                 "name": "braket.device_schema.dwave.dwave_device_capabilities",
                 "version": "1",
@@ -109,15 +112,15 @@ def braket_sampler_properties(
             },
             "deviceParameters": two_thousand_q_device_parameters,
         }
-    )
+    validate(d_wave_device_capabilities_json, DwaveDeviceCapabilities.schema())
+    return DwaveDeviceCapabilities.parse_obj(d_wave_device_capabilities_json)
 
 
 @pytest.fixture
 def advantage_braket_sampler_properties(
     provider_properties, service_properties, advantage_device_parameters
 ):
-    return DwaveDeviceCapabilities.parse_obj(
-        {
+    d_wave_device_capabilities_json = {
             "braketSchemaHeader": {
                 "name": "braket.device_schema.dwave.dwave_device_capabilities",
                 "version": "1",
@@ -141,7 +144,8 @@ def advantage_braket_sampler_properties(
             },
             "deviceParameters": advantage_device_parameters,
         }
-    )
+    validate(d_wave_device_capabilities_json, DwaveDeviceCapabilities.schema())
+    return DwaveDeviceCapabilities.parse_obj(d_wave_device_capabilities_json)
 
 
 @pytest.fixture

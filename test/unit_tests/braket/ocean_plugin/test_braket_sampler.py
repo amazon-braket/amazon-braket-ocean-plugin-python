@@ -84,8 +84,8 @@ def test_advantage_parameters(advantage_braket_sampler):
     assert isinstance(advantage_braket_sampler.parameters, FrozenDict)
 
 
-def test_properties(braket_sampler, provider_properties, service_properties):
-    provider_properties.update(service_properties)
+def test_properties(braket_sampler, provider_properties, service_properties_list):
+    provider_properties.update(service_properties_list)
     assert isinstance(braket_sampler.properties, FrozenDict)
     assert braket_sampler.properties == provider_properties
 
