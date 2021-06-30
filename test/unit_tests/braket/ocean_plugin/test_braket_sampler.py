@@ -17,6 +17,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 from boltons.dictutils import FrozenDict
+from braket.task_result import AnnealingTaskResult
 from braket.tasks import AnnealingQuantumTaskResult
 from conftest import (
     sample_ising_common_testing,
@@ -25,6 +26,7 @@ from conftest import (
     sample_qubo_quantum_task_common_testing,
 )
 from dimod.exceptions import BinaryQuadraticModelStructureError
+from jsonschema import validate
 
 from braket.ocean_plugin import BraketSampler, BraketSolverMetadata
 
@@ -84,8 +86,8 @@ def test_advantage_parameters(advantage_braket_sampler):
     assert isinstance(advantage_braket_sampler.parameters, FrozenDict)
 
 
-def test_properties(braket_sampler, provider_properties, service_properties):
-    provider_properties.update(service_properties)
+def test_properties(braket_sampler, provider_properties, service_properties_list):
+    provider_properties.update(service_properties_list)
     assert isinstance(braket_sampler.properties, FrozenDict)
     assert braket_sampler.properties == provider_properties
 
@@ -181,6 +183,7 @@ def test_get_task_sample_set_variables(
     del s3_dict["additionalMetadata"]["dwaveMetadata"]
     task = Mock()
     variables = [8, 9, 10]
+    validate(s3_dict, AnnealingTaskResult.schema())
     task.result.return_value = AnnealingQuantumTaskResult.from_string(json.dumps(s3_dict))
     actual = BraketSampler.get_task_sample_set(task, variables=variables)
     assert list(actual.variables) == variables

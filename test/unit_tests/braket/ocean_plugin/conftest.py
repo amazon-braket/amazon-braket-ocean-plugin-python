@@ -22,9 +22,12 @@ from braket.device_schema.dwave import (
     Dwave2000QDeviceParameters,
     DwaveAdvantageDeviceParameters,
     DwaveDeviceCapabilities,
+    DwaveProviderProperties,
 )
+from braket.task_result import AdditionalMetadata, AnnealingTaskResult, TaskMetadata
 from braket.tasks import AnnealingQuantumTaskResult
 from dimod import BINARY, SPIN, SampleSet
+from jsonschema import validate
 
 
 @pytest.fixture
@@ -39,12 +42,17 @@ def shots():
 
 @pytest.fixture
 def service_properties():
+    return {"shotsRange": [0, 10]}
+
+
+@pytest.fixture
+def service_properties_list():
     return {"shotsRange": (0, 10)}
 
 
 @pytest.fixture
 def provider_properties():
-    return {
+    dwave_provider_properties_json = {
         "annealingOffsetStep": 2.0,
         "annealingOffsetStepPhi0": 4.0,
         "annealingOffsetRanges": [[1.34, 5.23], [3.24, 1.44]],
@@ -68,6 +76,8 @@ def provider_properties():
         "taskRunDurationRange": [3, 6],
         "topology": {"type": "chimera", "topology": [1, 1, 1]},
     }
+    validate(dwave_provider_properties_json, DwaveProviderProperties.schema())
+    return dwave_provider_properties_json
 
 
 @pytest.fixture
@@ -84,64 +94,64 @@ def advantage_device_parameters():
 def braket_sampler_properties(
     provider_properties, service_properties, two_thousand_q_device_parameters
 ):
-    return DwaveDeviceCapabilities.parse_obj(
-        {
-            "braketSchemaHeader": {
-                "name": "braket.device_schema.dwave.dwave_device_capabilities",
-                "version": "1",
-            },
-            "provider": provider_properties,
-            "service": {
-                "executionWindows": [
-                    {
-                        "executionDay": "Everyday",
-                        "windowStartHour": "11:00",
-                        "windowEndHour": "12:00",
-                    }
-                ],
-                "shotsRange": service_properties["shotsRange"],
-            },
-            "action": {
-                "braket.ir.annealing.problem": {
-                    "actionType": "braket.ir.annealing.problem",
-                    "version": ["1"],
+    d_wave_device_capabilities_json = {
+        "braketSchemaHeader": {
+            "name": "braket.device_schema.dwave.dwave_device_capabilities",
+            "version": "1",
+        },
+        "provider": provider_properties,
+        "service": {
+            "executionWindows": [
+                {
+                    "executionDay": "Everyday",
+                    "windowStartHour": "11:00",
+                    "windowEndHour": "12:00",
                 }
-            },
-            "deviceParameters": two_thousand_q_device_parameters,
-        }
-    )
+            ],
+            "shotsRange": service_properties["shotsRange"],
+        },
+        "action": {
+            "braket.ir.annealing.problem": {
+                "actionType": "braket.ir.annealing.problem",
+                "version": ["1"],
+            }
+        },
+        "deviceParameters": two_thousand_q_device_parameters,
+    }
+    validate(d_wave_device_capabilities_json, DwaveDeviceCapabilities.schema())
+    return DwaveDeviceCapabilities.parse_obj(d_wave_device_capabilities_json)
 
 
 @pytest.fixture
 def advantage_braket_sampler_properties(
     provider_properties, service_properties, advantage_device_parameters
 ):
-    return DwaveDeviceCapabilities.parse_obj(
-        {
-            "braketSchemaHeader": {
-                "name": "braket.device_schema.dwave.dwave_device_capabilities",
-                "version": "1",
-            },
-            "provider": provider_properties,
-            "service": {
-                "executionWindows": [
-                    {
-                        "executionDay": "Everyday",
-                        "windowStartHour": "11:00",
-                        "windowEndHour": "12:00",
-                    }
-                ],
-                "shotsRange": service_properties["shotsRange"],
-            },
-            "action": {
-                "braket.ir.annealing.problem": {
-                    "actionType": "braket.ir.annealing.problem",
-                    "version": ["1"],
+    d_wave_device_capabilities_json = {
+        "braketSchemaHeader": {
+            "name": "braket.device_schema.dwave.dwave_device_capabilities",
+            "version": "1",
+        },
+        "provider": provider_properties,
+        "service": {
+            "executionWindows": [
+                {
+                    "executionDay": "Everyday",
+                    "windowStartHour": "11:00",
+                    "windowEndHour": "12:00",
                 }
-            },
-            "deviceParameters": advantage_device_parameters,
-        }
-    )
+            ],
+            "shotsRange": service_properties["shotsRange"],
+        },
+        "action": {
+            "braket.ir.annealing.problem": {
+                "actionType": "braket.ir.annealing.problem",
+                "version": ["1"],
+            }
+        },
+        "deviceParameters": advantage_device_parameters,
+    }
+    validate(d_wave_device_capabilities_json, DwaveDeviceCapabilities.schema())
+    return DwaveDeviceCapabilities.parse_obj(d_wave_device_capabilities_json)
 
 
 @pytest.fixture
@@ -151,7 +161,7 @@ def active_variables():
 
 @pytest.fixture()
 def additional_metadata(active_variables):
-    return {
+    additional_metadata_json = {
         "additionalMetadata": {
             "action": {
                 "type": "ISING",
@@ -176,13 +186,27 @@ def additional_metadata(active_variables):
                     "readoutTimePerRun": 274,
                 },
             },
-        }
+        },
+        "action": {
+            "type": "ISING",
+            "linear": {"0": 0.3333, "1": -0.333, "4": -0.333, "5": 0.333},
+            "quadratic": {"0,4": 0.667, "0,5": -1.0, "1,4": 0.667, "1,5": 0.667},
+        },
     }
+    validate(additional_metadata_json, AdditionalMetadata.schema())
+    return additional_metadata_json
 
 
 @pytest.fixture
 def task_metadata(shots, dwave_arn):
-    return {"taskMetadata": {"id": "task_arn", "shots": shots, "deviceId": dwave_arn}}
+    task_metadata_json = {
+        "taskMetadata": {"id": "task_arn", "shots": shots, "deviceId": dwave_arn},
+        "id": "task_arn",
+        "shots": shots,
+        "deviceId": dwave_arn,
+    }
+    validate(task_metadata_json, TaskMetadata.schema())
+    return task_metadata_json
 
 
 @pytest.fixture
@@ -195,6 +219,7 @@ def result(additional_metadata, task_metadata):
     }
     result.update(additional_metadata)
     result.update(task_metadata)
+    validate(result, AnnealingTaskResult.schema())
     return result
 
 
