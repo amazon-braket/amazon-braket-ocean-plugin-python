@@ -30,7 +30,7 @@ setup(
         "amazon-braket-sdk",
         "boto3",
         "boltons",
-        "colorama>=0.3.0",
+        "colorama>=0.4.4",
         "dimod>=0.8.13",
         "jsonref",
     ],
