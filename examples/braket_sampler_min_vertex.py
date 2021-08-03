@@ -13,9 +13,9 @@
 
 import dwave_networkx as dnx
 import networkx as nx
+from braket.aws import AwsDevice
 from dwave.system.composites import EmbeddingComposite
 
-from braket.aws import AwsDevice
 from braket.ocean_plugin import BraketSampler
 
 s3_destination_folder = ("your-s3-bucket", "your-folder")
