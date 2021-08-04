@@ -33,6 +33,7 @@ setup(
         "colorama>=0.4.4",
         "dimod>=0.8.13",
         "jsonref",
+        "wheel>=0.36.2",
     ],
     extras_require={
         "test": [
