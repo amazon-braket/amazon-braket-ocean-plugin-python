@@ -50,7 +50,7 @@ setup(
             "sphinx-rtd-theme",
             "sphinxcontrib-apidoc",
             "tox>=3.23.0",
-            "dwave-ocean-sdk",
+            "dwave-ocean-sdk>=3.4.0",
         ]
     },
     url="https://github.com/aws/amazon-braket-ocean-plugin-python",
