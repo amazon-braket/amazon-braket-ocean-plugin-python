@@ -28,7 +28,7 @@ setup(
     package_dir={"": "src"},
     install_requires=[
         "amazon-braket-sdk",
-        "boto3",
+        "boto3>=1.18.13",
         "boltons",
         "colorama>=0.4.4",
         "dimod>=0.8.13",
