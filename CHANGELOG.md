@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.5 (2021-08-05)
+
+### Bug Fixes and Other Changes
+
+ * Update dependency versions and git workflow builds
+
 ## v1.0.4 (2021-06-03)
 
 ### Bug Fixes and Other Changes
