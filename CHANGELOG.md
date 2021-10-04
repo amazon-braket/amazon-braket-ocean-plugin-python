@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.0.6 (2021-10-04)
+
+### Bug Fixes and Other Changes
+
+ * update copyright headers
+
+### Testing and Release Infrastructure
+
+ * pin colorama >=0.4.3
+
 ## v1.0.5 (2021-08-05)
 
 ### Bug Fixes and Other Changes
