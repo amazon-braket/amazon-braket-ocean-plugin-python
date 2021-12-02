@@ -175,15 +175,29 @@ class BraketSampler(Sampler, Structured):
 
         Examples:
             This example submits a two-variable Ising problem mapped directly to qubits
-            0 and 1.
+            0 and 1 on a D-Wave 2000Q device.
 
             >>> from braket.ocean_plugin import BraketSampler
-            >>> sampler = BraketSampler(s3_destination_folder, "device_arn_1")
-            >>> sampleset = sampler.sample_ising({0: -1, 1: 1}, {}, resultFormat="HISTOGRAM")
+            >>> device_arn_1 = "arn:aws:braket:::device/qpu/d-wave/DW_2000Q_6"
+            >>> sampler = BraketSampler(s3_destination_folder, device_arn_1)
+            >>> Q = {0: -1, 1: 1}
+            >>> sampleset = sampler.sample_ising(Q, {}, resultFormat="HISTOGRAM")
             >>> for sample in sampleset.samples():
             ...    print(sample)
             ...
             {0: 1, 1: -1}
+
+            This example submits a two-variable Ising problem mapped directly to qubits
+            0 and 1 on a D-Wave Advantage4 device.
+
+            >>> from braket.ocean_plugin import BraketSampler
+            >>> device_arn_1 = "arn:aws:braket:::device/qpu/d-wave/Advantage_system4"
+            >>> sampler = BraketSampler(s3_destination_folder, device_arn_1)
+            >>> Q = {30: -1, 31: 1}
+            >>> sampleset = sampler.sample_ising(Q, {}, resultFormat="HISTOGRAM")
+            >>> for sample in sampleset.samples():
+            ...    print(sample)
+            ...
         """
 
         if isinstance(h, list):
@@ -224,16 +238,32 @@ class BraketSampler(Sampler, Structured):
 
         Examples:
             This example submits a two-variable Ising problem mapped directly to qubits
-            0 and 1.
+            0 and 1 on a D-Wave 2000Q device.
 
             >>> from braket.ocean_plugin import BraketSampler
-            >>> sampler = BraketSampler(s3_destination_folder, "device_arn_1")
-            >>> task = sampler.sample_ising_quantum_task({0: 1, 1: 1}, {}, resultFormat="HISTOGRAM")
+            >>> device_arn_1 = "arn:aws:braket:::device/qpu/d-wave/DW_2000Q_6"
+            >>> sampler = BraketSampler(s3_destination_folder, device_arn_1)
+            >>> Q = {0: 1, 1: 1}
+            >>> task = sampler.sample_ising_quantum_task(Q, {}, resultFormat="HISTOGRAM")
             >>> sampleset = BraketSampler.get_task_sample_set(task)
             >>> for sample in sampleset.samples():
             ...    print(sample)
             ...
             {0: 1, 1: -1}
+
+
+            This example submits a two-variable Ising problem mapped directly to qubits
+            0 and 1 on a D-Wave Advantage4 device.
+
+            >>> from braket.ocean_plugin import BraketSampler
+            >>> device_arn_1 = "arn:aws:braket:::device/qpu/d-wave/Advantage_system4"
+            >>> sampler = BraketSampler(s3_destination_folder, device_arn_1)
+            >>> Q = {30: 1, 31: 1}
+            >>> task = sampler.sample_ising_quantum_task(Q, {}, resultFormat="HISTOGRAM")
+            >>> sampleset = BraketSampler.get_task_sample_set(task)
+            >>> for sample in sampleset.samples():
+            ...    print(sample)
+            ...
         """
         solver_kwargs = self._process_solver_kwargs(**kwargs)
 
@@ -273,16 +303,34 @@ class BraketSampler(Sampler, Structured):
 
         Examples:
             This example submits a two-variable QUBO mapped directly to qubits
-            0 and 4 on a sampler
+            0 and 4 on a sampler on the D-Wave 2000Q device.
 
             >>> from braket.ocean_plugin import BraketSampler
-            >>> sampler = BraketSampler(s3_destination_folder, "device_arn_1")
+            >>> device_arn_1 = "arn:aws:braket:::device/qpu/d-wave/DW_2000Q_6"
+            >>> sampler = BraketSampler(s3_destination_folder, device_arn_1)
             >>> Q = {(0, 0): -1, (4, 4): -1, (0, 4): 2}
             >>> sampleset = sampler.sample_qubo(Q, postprocessingType="SAMPLING", shots=100)
             >>> for sample in sampleset.samples():
             ...    print(sample)
             ...
+            {0: 0, 4: 1}
             {0: 1, 4: 0}
+            {0: 0, 4: 0}
+            {0: 1, 4: 1}
+
+            This example submits a two-variable QUBO mapped directly to qubits
+            30 and 31 on a sampler on the D-Wave Advantage4 device.
+            >>> from braket.ocean_plugin import BraketSampler
+            >>> device_arn_1 = "arn:aws:braket:::device/qpu/d-wave/Advantage_system4"
+            >>> sampler = BraketSampler(s3_destination_folder, device_arn_1)
+            >>> Q = {(30, 30): -1, (31, 31): -1, (30, 31): 2}
+            >>> sampleset = sampler.sample_qubo(Q, shots=100)
+            >>> for sample in sampleset.samples():
+            ...    print(sample)
+            ...
+            {30: 0, 31: 1}
+            {30: 1, 31: 0}
+
         """
         aws_task = self.sample_qubo_quantum_task(Q, **kwargs)
         variables = set().union(*Q)
@@ -308,28 +356,53 @@ class BraketSampler(Sampler, Structured):
 
         Examples:
             This example submits a two-variable QUBO mapped directly to qubits
-            0 and 4 on a sampler
+            0 and 4 on a sampler on the D-Wave 2000Q device.
 
             >>> from braket.ocean_plugin import BraketSampler
-            >>> sampler = BraketSampler(s3_destination_folder, "device_arn_1")
+            >>> device_arn_1 = "arn:aws:braket:::device/qpu/d-wave/DW_2000Q_6"
+            >>> sampler = BraketSampler(s3_destination_folder, device_arn_1)
             >>> Q = {(0, 0): -1, (4, 4): -1, (0, 4): 2}
             >>> task = sampler.sample_qubo_quantum_task(Q, resultFormat="HISTOGRAM", shots=100)
             >>> sampleset = BraketSampler.get_task_sample_set(task)
             >>> for sample in sampleset.samples():
             ...    print(sample)
             ...
+            {0: 0, 4: 1}
             {0: 1, 4: 0}
+
+            This example submits a two-variable QUBO mapped directly to qubits
+            30 and 31 on a sampler on the D-Wave Advantage4 device.
+
+            >>> from braket.ocean_plugin import BraketSampler
+            >>> device_arn_1 = "arn:aws:braket:::device/qpu/d-wave/Advantage_system4"
+            >>> sampler = BraketSampler(s3_destination_folder, device_arn_1)
+            >>> Q = {(30, 30): -1, (31, 31): -1, (30, 31): 2}
+            >>> task = sampler.sample_qubo_quantum_task(Q, resultFormat="HISTOGRAM", shots=100)
+            >>> sampleset = BraketSampler.get_task_sample_set(task)
+            >>> for sample in sampleset.samples():
+            ...    print(sample)
+            ...
+            {30: 0, 31: 1}
+            {30: 1, 31: 0}
         """
         solver_kwargs = self._process_solver_kwargs(**kwargs)
 
         sorted_edges = frozenset((u, v) if u < v else (v, u) for u, v in Q)
-        if not all(
-            u in self._access_optimized_nodelist()
-            if u == v
-            else v in self._access_optimized_edgelist().get(u, ())
-            for u, v in sorted_edges
-        ):
-            raise BinaryQuadraticModelStructureError("Problem graph incompatible with solver.")
+        print(self._access_optimized_edgelist())
+        for u, v in sorted_edges:
+            if u not in self._access_optimized_nodelist():
+                raise BinaryQuadraticModelStructureError(
+                    "Problem graph incompatible with solver. Qubits are not in the device's qubit "
+                    "set."
+                )
+            if v not in self._access_optimized_edgelist().get(u, ()) and u != v:
+                raise BinaryQuadraticModelStructureError(
+                    "Problem graph incompatible with solver. Nodes "
+                    + str(u)
+                    + " and "
+                    + str(v)
+                    + " are not connected."
+                )
 
         linear = {}
         quadratic = {}
