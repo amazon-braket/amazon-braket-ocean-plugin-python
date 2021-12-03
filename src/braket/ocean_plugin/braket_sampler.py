@@ -147,7 +147,7 @@ class BraketSampler(Sampler, Structured):
         return FrozenDict(edges)
 
     def sample_ising(
-        self, h: Union[Dict[int, int], List[int]], J: Dict[int, int], **kwargs
+        self, h: Union[Dict[int, float], List[float]], J: Dict[Tuple[int, int], float], **kwargs
     ) -> SampleSet:
         """
         Sample from the specified Ising model.
@@ -195,7 +195,7 @@ class BraketSampler(Sampler, Structured):
         return BraketSampler.get_task_sample_set(aws_task, variables)
 
     def sample_ising_quantum_task(
-        self, h: Union[Dict[int, int], List[int]], J: Dict[Tuple[int, int], float], **kwargs
+        self, h: Union[Dict[int, float], List[float]], J: Dict[Tuple[int, int], float], **kwargs
     ) -> QuantumTask:
         """
         Sample from the specified Ising model and return a `QuantumTask`. This has the same inputs
@@ -254,7 +254,7 @@ class BraketSampler(Sampler, Structured):
             **solver_kwargs,
         )
 
-    def sample_qubo(self, Q: Dict[Tuple[int, int], int], **kwargs) -> SampleSet:
+    def sample_qubo(self, Q: Dict[Tuple[int, int], float], **kwargs) -> SampleSet:
         """
         Sample from the specified QUBO.
 
@@ -288,7 +288,7 @@ class BraketSampler(Sampler, Structured):
         variables = set().union(*Q)
         return BraketSampler.get_task_sample_set(aws_task, variables)
 
-    def sample_qubo_quantum_task(self, Q: Dict[Tuple[int, int], int], **kwargs) -> QuantumTask:
+    def sample_qubo_quantum_task(self, Q: Dict[Tuple[int, int], float], **kwargs) -> QuantumTask:
         """
         Sample from the specified QUBO and return a `QuantumTask`. This has the same inputs
         as `BraketSampler.sample_qubo`
