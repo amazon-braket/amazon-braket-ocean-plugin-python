@@ -180,8 +180,8 @@ class BraketSampler(Sampler, Structured):
             >>> from braket.ocean_plugin import BraketSampler
             >>> device_arn_1 = "arn:aws:braket:::device/qpu/d-wave/DW_2000Q_6"
             >>> sampler = BraketSampler(s3_destination_folder, device_arn_1)
-            >>> Q = {0: -1, 1: 1}
-            >>> sampleset = sampler.sample_ising(Q, {}, resultFormat="HISTOGRAM")
+            >>> H = {0: -1, 1: 1}
+            >>> sampleset = sampler.sample_ising(H, {}, resultFormat="HISTOGRAM")
             >>> for sample in sampleset.samples():
             ...    print(sample)
             ...
@@ -193,11 +193,12 @@ class BraketSampler(Sampler, Structured):
             >>> from braket.ocean_plugin import BraketSampler
             >>> device_arn_1 = "arn:aws:braket:::device/qpu/d-wave/Advantage_system4"
             >>> sampler = BraketSampler(s3_destination_folder, device_arn_1)
-            >>> Q = {30: -1, 31: 1}
-            >>> sampleset = sampler.sample_ising(Q, {}, resultFormat="HISTOGRAM")
+            >>> H = {30: -1, 31: 1}
+            >>> sampleset = sampler.sample_ising(H, {}, resultFormat="HISTOGRAM")
             >>> for sample in sampleset.samples():
             ...    print(sample)
             ...
+            {30: 1, 31: -1}
         """
 
         if isinstance(h, list):
@@ -264,6 +265,7 @@ class BraketSampler(Sampler, Structured):
             >>> for sample in sampleset.samples():
             ...    print(sample)
             ...
+            {30: 1, 31: -1}
         """
         solver_kwargs = self._process_solver_kwargs(**kwargs)
 
@@ -315,8 +317,6 @@ class BraketSampler(Sampler, Structured):
             ...
             {0: 0, 4: 1}
             {0: 1, 4: 0}
-            {0: 0, 4: 0}
-            {0: 1, 4: 1}
 
             This example submits a two-variable QUBO mapped directly to qubits
             30 and 31 on a sampler on the D-Wave Advantage4 device.
@@ -392,12 +392,12 @@ class BraketSampler(Sampler, Structured):
         for u, v in sorted_edges:
             if u not in self._access_optimized_nodelist():
                 raise BinaryQuadraticModelStructureError(
-                    "Problem graph incompatible with solver. Qubits are not in the device's qubit "
-                    "set."
+                    "Problem graph incompatible with solver. Qubit " + u +
+                    " is not in the device's qubit set."
                 )
             if v not in self._access_optimized_edgelist().get(u, ()) and u != v:
                 raise BinaryQuadraticModelStructureError(
-                    "Problem graph incompatible with solver. Nodes "
+                    "Problem graph incompatible with solver. Solver nodes "
                     + str(u)
                     + " and "
                     + str(v)
