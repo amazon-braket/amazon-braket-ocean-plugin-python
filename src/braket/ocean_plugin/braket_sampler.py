@@ -252,7 +252,6 @@ class BraketSampler(Sampler, Structured):
             ...
             {0: 1, 1: -1}
 
-
             This example submits a two-variable Ising problem mapped directly to qubits
             0 and 1 on a D-Wave Advantage4 device.
 
@@ -392,8 +391,9 @@ class BraketSampler(Sampler, Structured):
         for u, v in sorted_edges:
             if u not in self._access_optimized_nodelist():
                 raise BinaryQuadraticModelStructureError(
-                    "Problem graph incompatible with solver. Qubit " + u +
-                    " is not in the device's qubit set."
+                    "Problem graph incompatible with solver. Qubit "
+                    + str(u)
+                    + " is not in the device's qubit set."
                 )
             if v not in self._access_optimized_edgelist().get(u, ()) and u != v:
                 raise BinaryQuadraticModelStructureError(
