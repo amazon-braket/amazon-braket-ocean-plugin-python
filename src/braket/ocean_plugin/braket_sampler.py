@@ -180,8 +180,8 @@ class BraketSampler(Sampler, Structured):
             >>> from braket.ocean_plugin import BraketSampler
             >>> device_arn_1 = "arn:aws:braket:::device/qpu/d-wave/DW_2000Q_6"
             >>> sampler = BraketSampler(s3_destination_folder, device_arn_1)
-            >>> H = {0: -1, 1: 1}
-            >>> sampleset = sampler.sample_ising(H, {}, resultFormat="HISTOGRAM")
+            >>> h = {0: -1, 1: 1}
+            >>> sampleset = sampler.sample_ising(h, {}, resultFormat="HISTOGRAM")
             >>> for sample in sampleset.samples():
             ...    print(sample)
             ...
@@ -193,8 +193,8 @@ class BraketSampler(Sampler, Structured):
             >>> from braket.ocean_plugin import BraketSampler
             >>> device_arn_1 = "arn:aws:braket:::device/qpu/d-wave/Advantage_system4"
             >>> sampler = BraketSampler(s3_destination_folder, device_arn_1)
-            >>> H = {30: -1, 31: 1}
-            >>> sampleset = sampler.sample_ising(H, {}, resultFormat="HISTOGRAM")
+            >>> h = {30: -1, 31: 1}
+            >>> sampleset = sampler.sample_ising(h, {}, resultFormat="HISTOGRAM")
             >>> for sample in sampleset.samples():
             ...    print(sample)
             ...
