@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.7 (2021-12-08)
+
+### Bug Fixes and Other Changes
+
+ * Update Sampler examples to be device specific and make error out…
+
 ## v1.0.6 (2021-10-04)
 
 ### Bug Fixes and Other Changes
