@@ -110,7 +110,7 @@ class BraketDWaveSampler(BraketSampler):
         )
 
     def sample_ising(
-        self, h: Union[Dict[int, int], List[int]], J: Dict[int, int], **kwargs
+        self, h: Union[Dict[int, float], List[float]], J: Dict[Tuple[int, int], float], **kwargs
     ) -> SampleSet:
         """
         Sample from the specified Ising model.
@@ -162,7 +162,7 @@ class BraketDWaveSampler(BraketSampler):
         return super().sample_ising(h, J, **kwargs)
 
     def sample_ising_quantum_task(
-        self, h: Union[Dict[int, int], List[int]], J: Dict[Tuple[int, int], float], **kwargs
+        self, h: Union[Dict[int, float], List[float]], J: Dict[Tuple[int, int], float], **kwargs
     ) -> QuantumTask:
         """
         Sample from the specified Ising model and return a `QuantumTask`. This has the same inputs
@@ -217,7 +217,7 @@ class BraketDWaveSampler(BraketSampler):
         """
         return super().sample_ising_quantum_task(h, J, **kwargs)
 
-    def sample_qubo(self, Q: Dict[Tuple[int, int], int], **kwargs) -> SampleSet:
+    def sample_qubo(self, Q: Dict[Tuple[int, int], float], **kwargs) -> SampleSet:
         """
         Sample from the specified QUBO.
 
@@ -260,7 +260,7 @@ class BraketDWaveSampler(BraketSampler):
         """
         return super().sample_qubo(Q, **kwargs)
 
-    def sample_qubo_quantum_task(self, Q: Dict[Tuple[int, int], int], **kwargs) -> QuantumTask:
+    def sample_qubo_quantum_task(self, Q: Dict[Tuple[int, int], float], **kwargs) -> QuantumTask:
         """
         Sample from the specified QUBO and return a `QuantumTask`. This has the same inputs
         as `BraketDWaveSampler.sample_qubo`.
