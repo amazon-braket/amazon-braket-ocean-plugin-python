@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.8 (2022-02-09)
+
+### Bug Fixes and Other Changes
+
+ * correct parameter types in sampler methods
+
 ## v1.0.7 (2021-12-08)
 
 ### Bug Fixes and Other Changes
