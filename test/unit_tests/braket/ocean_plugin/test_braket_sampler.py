@@ -50,7 +50,7 @@ def device_parameters(braket_dwave_parameters):
 @patch("braket.ocean_plugin.braket_sampler.AwsDevice")
 def braket_sampler(mock_qpu, braket_sampler_properties, s3_destination_folder, logger, dwave_arn):
     mock_qpu.return_value.properties = braket_sampler_properties
-    sampler = BraketSampler(s3_destination_folder, dwave_arn, Mock(), logger)
+    sampler = BraketSampler(dwave_arn, s3_destination_folder, Mock(), logger)
     return sampler
 
 
@@ -60,7 +60,7 @@ def advantage_braket_sampler(
     mock_qpu, advantage_braket_sampler_properties, s3_destination_folder, logger, dwave_arn
 ):
     mock_qpu.return_value.properties = advantage_braket_sampler_properties
-    sampler = BraketSampler(s3_destination_folder, dwave_arn, Mock(), logger)
+    sampler = BraketSampler(dwave_arn, s3_destination_folder, Mock(), logger)
     return sampler
 
 

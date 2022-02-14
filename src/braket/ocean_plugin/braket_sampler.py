@@ -46,13 +46,13 @@ class BraketSampler(Sampler, Structured):
     Examples:
         >>> from braket.ocean_plugin import BraketSampler
         >>> s3_destination_folder = ('test_bucket', 'test_folder')
-        >>> sampler = BraketSampler(s3_destination_folder, "device_arn_1")
+        >>> sampler = BraketSampler("device_arn_1", s3_destination_folder)
     """
 
     def __init__(
         self,
-        s3_destination_folder: AwsSession.S3DestinationFolder,
         device_arn: str,
+        s3_destination_folder: AwsSession.S3DestinationFolder = None,
         aws_session: AwsSession = None,
         logger: Logger = getLogger(__name__),
     ):
@@ -179,7 +179,7 @@ class BraketSampler(Sampler, Structured):
 
             >>> from braket.ocean_plugin import BraketSampler
             >>> device_arn_1 = "arn:aws:braket:::device/qpu/d-wave/DW_2000Q_6"
-            >>> sampler = BraketSampler(s3_destination_folder, device_arn_1)
+            >>> sampler = BraketSampler(device_arn_1, s3_destination_folder)
             >>> h = {0: -1, 1: 1}
             >>> sampleset = sampler.sample_ising(h, {}, resultFormat="HISTOGRAM")
             >>> for sample in sampleset.samples():
@@ -192,7 +192,7 @@ class BraketSampler(Sampler, Structured):
 
             >>> from braket.ocean_plugin import BraketSampler
             >>> device_arn_1 = "arn:aws:braket:::device/qpu/d-wave/Advantage_system4"
-            >>> sampler = BraketSampler(s3_destination_folder, device_arn_1)
+            >>> sampler = BraketSampler(device_arn_1, s3_destination_folder)
             >>> h = {30: -1, 31: 1}
             >>> sampleset = sampler.sample_ising(h, {}, resultFormat="HISTOGRAM")
             >>> for sample in sampleset.samples():
@@ -243,7 +243,7 @@ class BraketSampler(Sampler, Structured):
 
             >>> from braket.ocean_plugin import BraketSampler
             >>> device_arn_1 = "arn:aws:braket:::device/qpu/d-wave/DW_2000Q_6"
-            >>> sampler = BraketSampler(s3_destination_folder, device_arn_1)
+            >>> sampler = BraketSampler(device_arn_1, s3_destination_folder)
             >>> Q = {0: 1, 1: 1}
             >>> task = sampler.sample_ising_quantum_task(Q, {}, resultFormat="HISTOGRAM")
             >>> sampleset = BraketSampler.get_task_sample_set(task)
@@ -257,7 +257,7 @@ class BraketSampler(Sampler, Structured):
 
             >>> from braket.ocean_plugin import BraketSampler
             >>> device_arn_1 = "arn:aws:braket:::device/qpu/d-wave/Advantage_system4"
-            >>> sampler = BraketSampler(s3_destination_folder, device_arn_1)
+            >>> sampler = BraketSampler(device_arn_1, s3_destination_folder)
             >>> Q = {30: 1, 31: 1}
             >>> task = sampler.sample_ising_quantum_task(Q, {}, resultFormat="HISTOGRAM")
             >>> sampleset = BraketSampler.get_task_sample_set(task)
@@ -308,7 +308,7 @@ class BraketSampler(Sampler, Structured):
 
             >>> from braket.ocean_plugin import BraketSampler
             >>> device_arn_1 = "arn:aws:braket:::device/qpu/d-wave/DW_2000Q_6"
-            >>> sampler = BraketSampler(s3_destination_folder, device_arn_1)
+            >>> sampler = BraketSampler(device_arn_1, s3_destination_folder)
             >>> Q = {(0, 0): -1, (4, 4): -1, (0, 4): 2}
             >>> sampleset = sampler.sample_qubo(Q, postprocessingType="SAMPLING", shots=100)
             >>> for sample in sampleset.samples():
@@ -321,7 +321,7 @@ class BraketSampler(Sampler, Structured):
             30 and 31 on a sampler on the D-Wave Advantage4 device.
             >>> from braket.ocean_plugin import BraketSampler
             >>> device_arn_1 = "arn:aws:braket:::device/qpu/d-wave/Advantage_system4"
-            >>> sampler = BraketSampler(s3_destination_folder, device_arn_1)
+            >>> sampler = BraketSampler(device_arn_1, s3_destination_folder)
             >>> Q = {(30, 30): -1, (31, 31): -1, (30, 31): 2}
             >>> sampleset = sampler.sample_qubo(Q, shots=100)
             >>> for sample in sampleset.samples():
@@ -359,7 +359,7 @@ class BraketSampler(Sampler, Structured):
 
             >>> from braket.ocean_plugin import BraketSampler
             >>> device_arn_1 = "arn:aws:braket:::device/qpu/d-wave/DW_2000Q_6"
-            >>> sampler = BraketSampler(s3_destination_folder, device_arn_1)
+            >>> sampler = BraketSampler(device_arn_1, s3_destination_folder)
             >>> Q = {(0, 0): -1, (4, 4): -1, (0, 4): 2}
             >>> task = sampler.sample_qubo_quantum_task(Q, resultFormat="HISTOGRAM", shots=100)
             >>> sampleset = BraketSampler.get_task_sample_set(task)
@@ -374,7 +374,7 @@ class BraketSampler(Sampler, Structured):
 
             >>> from braket.ocean_plugin import BraketSampler
             >>> device_arn_1 = "arn:aws:braket:::device/qpu/d-wave/Advantage_system4"
-            >>> sampler = BraketSampler(s3_destination_folder, device_arn_1)
+            >>> sampler = BraketSampler(device_arn_1, s3_destination_folder)
             >>> Q = {(30, 30): -1, (31, 31): -1, (30, 31): 2}
             >>> task = sampler.sample_qubo_quantum_task(Q, resultFormat="HISTOGRAM", shots=100)
             >>> sampleset = BraketSampler.get_task_sample_set(task)
