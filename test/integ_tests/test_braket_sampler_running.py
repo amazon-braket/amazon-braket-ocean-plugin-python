@@ -22,7 +22,7 @@ def test_factoring_minorminer(
     dwave_arn, aws_session, s3_destination_folder, factoring_bqm, integer_to_factor
 ):
     sampler = BraketSampler(
-        device_arn=dwave_arn, s3_destination_folder=s3_destination_folder, aws_session=aws_session
+        s3_destination_folder=s3_destination_folder, device_arn=dwave_arn, aws_session=aws_session
     )
     _, target_edgelist, target_adjacency = sampler.structure
     embedding = minorminer.find_embedding(factoring_bqm.quadratic, target_edgelist)

@@ -26,10 +26,8 @@ from braket.ocean_plugin import BraketDWaveSampler
 # Getting the SampleSet from the quantum task object
 
 
-# Declare folder to save S3 results
-s3_destination_folder = ("your-s3-bucket", "your-folder")
 # Declare sampler
-sampler = BraketDWaveSampler(s3_destination_folder)
+sampler = BraketDWaveSampler()
 
 integer_to_factor = 15
 

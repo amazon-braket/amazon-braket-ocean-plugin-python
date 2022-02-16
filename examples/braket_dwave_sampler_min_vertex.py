@@ -17,8 +17,7 @@ from dwave.system.composites import EmbeddingComposite
 
 from braket.ocean_plugin import BraketDWaveSampler
 
-s3_destination_folder = ("your-s3-bucket", "your-folder")
-sampler = BraketDWaveSampler(s3_destination_folder)
+sampler = BraketDWaveSampler()
 
 star_graph = nx.star_graph(4)  # star graph where node 0 is connected to 4 other nodes
 

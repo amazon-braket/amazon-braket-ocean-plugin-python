@@ -25,10 +25,8 @@ logger.addHandler(
 )  # configure to log to file
 logger.setLevel(logging.DEBUG)  # log to file all log messages with level DEBUG or above
 
-s3_destination_folder = ("your-s3-bucket", "your-folder")
-
 # Pass in logger to BraketDWaveSampler
-sampler = BraketDWaveSampler(s3_destination_folder, logger=logger)
+sampler = BraketDWaveSampler(logger=logger)
 
 star_graph = nx.star_graph(4)  # star graph where node 0 is connected to 4 other nodes
 

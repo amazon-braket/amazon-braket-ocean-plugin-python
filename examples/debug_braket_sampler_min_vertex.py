@@ -16,7 +16,6 @@ import sys
 
 import dwave_networkx as dnx
 import networkx as nx
-from braket.aws import AwsDevice
 from dwave.system.composites import EmbeddingComposite
 
 from braket.ocean_plugin import BraketSampler
@@ -25,14 +24,8 @@ logger = logging.getLogger("newLogger")  # create new logger
 logger.addHandler(logging.StreamHandler(stream=sys.stdout))  # configure to print to sys.stdout
 logger.setLevel(logging.DEBUG)  # print to sys.stdout all log messages with level DEBUG or above
 
-s3_destination_folder = ("your-s3-bucket", "your-folder")
-
-# Get an online D-Wave device ARN
-device_arn = AwsDevice.get_devices(provider_names=["D-Wave Systems"], statuses=["ONLINE"])[0].arn
-print("Using device ARN", device_arn)
-
 # Pass in logger to BraketSampler
-sampler = BraketSampler(s3_destination_folder, device_arn, logger=logger)
+sampler = BraketSampler(logger=logger)
 
 star_graph = nx.star_graph(4)  # star graph where node 0 is connected to 4 other nodes
 

@@ -21,7 +21,7 @@ def test_factoring_embedded_composite(
     dwave_arn, aws_session, s3_destination_folder, factoring_bqm, integer_to_factor
 ):
     sampler = BraketDWaveSampler(
-        device_arn=dwave_arn, s3_destination_folder=s3_destination_folder, aws_session=aws_session
+        s3_destination_folder=s3_destination_folder, device_arn=dwave_arn, aws_session=aws_session
     )
     embedding_sampler = EmbeddingComposite(sampler)
     response = embedding_sampler.sample(

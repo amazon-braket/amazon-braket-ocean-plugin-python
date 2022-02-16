@@ -57,15 +57,13 @@ def braket_dwave_sampler(
     mock_qpu, braket_sampler_properties, s3_destination_folder, logger, dwave_arn
 ):
     mock_qpu.return_value.properties = braket_sampler_properties
-    sampler = BraketDWaveSampler(dwave_arn, s3_destination_folder, Mock(), logger)
+    sampler = BraketDWaveSampler(s3_destination_folder, dwave_arn, Mock(), logger)
     assert isinstance(sampler, BraketSampler)
     return sampler
 
 
 @patch("braket.ocean_plugin.braket_sampler.AwsDevice")
-@patch("braket.ocean_plugin.braket_dwave_sampler.AwsDevice")
 def test_default_device_arn(
-    dwave_sampler_mock_qpu,
     sampler_mock_qpu,
     braket_sampler_properties,
     s3_destination_folder,
@@ -74,20 +72,20 @@ def test_default_device_arn(
 ):
     mock_device = Mock()
     mock_device.arn = dwave_arn
-    dwave_sampler_mock_qpu.get_devices.return_value = [mock_device]
+    sampler_mock_qpu.get_devices.return_value = [mock_device]
     sampler_mock_qpu.return_value.properties = braket_sampler_properties
-    sampler = BraketDWaveSampler(None, s3_destination_folder, Mock(), logger)
+    sampler = BraketDWaveSampler(s3_destination_folder, None, Mock(), logger)
     assert isinstance(sampler, BraketSampler)
     assert sampler._device_arn == dwave_arn
 
 
 @pytest.mark.xfail(raises=RuntimeError)
-@patch("braket.ocean_plugin.braket_dwave_sampler.AwsDevice")
-def test_default_device_arn_error(dwave_sampler_mock_qpu, s3_destination_folder, logger, dwave_arn):
+@patch("braket.ocean_plugin.braket_sampler.AwsDevice")
+def test_default_device_arn_error(sampler_mock_qpu, s3_destination_folder, logger, dwave_arn):
     mock_device = Mock()
     mock_device.arn = dwave_arn
-    dwave_sampler_mock_qpu.get_devices.return_value = []
-    BraketDWaveSampler(None, s3_destination_folder, Mock(), logger)
+    sampler_mock_qpu.get_devices.return_value = []
+    BraketDWaveSampler(s3_destination_folder, None, Mock(), logger)
 
 
 def test_parameters(braket_dwave_sampler):
