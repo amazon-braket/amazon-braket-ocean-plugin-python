@@ -13,18 +13,13 @@
 
 import dwave_networkx as dnx
 import networkx as nx
-from braket.aws import AwsDevice
 from dwave.system.composites import EmbeddingComposite
 
 from braket.ocean_plugin import BraketSampler
 
-s3_destination_folder = ("your-s3-bucket", "your-folder")
-
-# Get an online D-Wave device ARN
-device_arn = AwsDevice.get_devices(provider_names=["D-Wave Systems"], statuses=["ONLINE"])[0].arn
-print("Using device ARN", device_arn)
-
-sampler = BraketSampler(s3_destination_folder, device_arn)
+# Use a default online D-Wave device ARN
+sampler = BraketSampler()
+print("Using device ARN", sampler.solver.arn)
 
 star_graph = nx.star_graph(4)  # star graph where node 0 is connected to 4 other nodes
 

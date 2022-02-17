@@ -21,7 +21,9 @@ from braket.ocean_plugin import BraketSampler
 def test_factoring_minorminer(
     dwave_arn, aws_session, s3_destination_folder, factoring_bqm, integer_to_factor
 ):
-    sampler = BraketSampler(s3_destination_folder, device_arn=dwave_arn, aws_session=aws_session)
+    sampler = BraketSampler(
+        s3_destination_folder=s3_destination_folder, device_arn=dwave_arn, aws_session=aws_session
+    )
     _, target_edgelist, target_adjacency = sampler.structure
     embedding = minorminer.find_embedding(factoring_bqm.quadratic, target_edgelist)
     bqm_embedded = embed_bqm(factoring_bqm, embedding, target_adjacency, 3.0)

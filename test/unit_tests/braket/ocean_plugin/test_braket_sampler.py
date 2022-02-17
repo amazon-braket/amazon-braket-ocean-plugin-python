@@ -98,6 +98,23 @@ def test_nodelist(braket_sampler):
     assert braket_sampler.nodelist == (0, 1, 2)
 
 
+@patch("braket.ocean_plugin.braket_sampler.AwsDevice")
+def test_default_device_arn(
+    sampler_mock_qpu,
+    braket_sampler_properties,
+    s3_destination_folder,
+    logger,
+    dwave_arn,
+):
+    mock_device = Mock()
+    mock_device.arn = dwave_arn
+    sampler_mock_qpu.get_devices.return_value = [mock_device]
+    sampler_mock_qpu.return_value.properties = braket_sampler_properties
+    sampler = BraketSampler(s3_destination_folder, None, Mock(), logger)
+    assert isinstance(sampler, BraketSampler)
+    assert sampler._device_arn == dwave_arn
+
+
 @pytest.mark.xfail(raises=BinaryQuadraticModelStructureError)
 @pytest.mark.parametrize(
     "h, J", [({0: -1, 500: 1}, {}), ({0: -1, 1: 1}, {(0, 1): 3}), ({0: -1, 2: 1}, {(3, 500): 3})]

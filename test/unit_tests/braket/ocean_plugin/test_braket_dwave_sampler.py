@@ -50,6 +50,7 @@ def device_parameters_2():
     return {BraketSolverMetadata.DWAVE["device_parameters_key_name"]: {}}
 
 
+# Removed s3_destination_folder fixture parameter.
 @pytest.fixture
 @patch("braket.ocean_plugin.braket_sampler.AwsDevice")
 def braket_dwave_sampler(
@@ -62,9 +63,7 @@ def braket_dwave_sampler(
 
 
 @patch("braket.ocean_plugin.braket_sampler.AwsDevice")
-@patch("braket.ocean_plugin.braket_dwave_sampler.AwsDevice")
 def test_default_device_arn(
-    dwave_sampler_mock_qpu,
     sampler_mock_qpu,
     braket_sampler_properties,
     s3_destination_folder,
@@ -73,7 +72,7 @@ def test_default_device_arn(
 ):
     mock_device = Mock()
     mock_device.arn = dwave_arn
-    dwave_sampler_mock_qpu.get_devices.return_value = [mock_device]
+    sampler_mock_qpu.get_devices.return_value = [mock_device]
     sampler_mock_qpu.return_value.properties = braket_sampler_properties
     sampler = BraketDWaveSampler(s3_destination_folder, None, Mock(), logger)
     assert isinstance(sampler, BraketSampler)
@@ -81,11 +80,11 @@ def test_default_device_arn(
 
 
 @pytest.mark.xfail(raises=RuntimeError)
-@patch("braket.ocean_plugin.braket_dwave_sampler.AwsDevice")
-def test_default_device_arn_error(dwave_sampler_mock_qpu, s3_destination_folder, logger, dwave_arn):
+@patch("braket.ocean_plugin.braket_sampler.AwsDevice")
+def test_default_device_arn_error(sampler_mock_qpu, s3_destination_folder, logger, dwave_arn):
     mock_device = Mock()
     mock_device.arn = dwave_arn
-    dwave_sampler_mock_qpu.get_devices.return_value = []
+    sampler_mock_qpu.get_devices.return_value = []
     BraketDWaveSampler(s3_destination_folder, None, Mock(), logger)
 
 
