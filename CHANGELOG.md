@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.9 (2022-02-17)
+
+### Bug Fixes and Other Changes
+
+ * make s3_folder optional
+
 ## v1.0.8 (2022-02-09)
 
 ### Bug Fixes and Other Changes
