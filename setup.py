@@ -32,6 +32,7 @@ setup(
         "boltons>=20.0.0",
         "colorama>=0.4.3",
         "dimod>=0.8.13",
+        "dwave-cloud-client>=0.9.4",
         "jsonref",
         "wheel>=0.36.2",
     ],

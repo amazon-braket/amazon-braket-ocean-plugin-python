@@ -23,6 +23,7 @@ from boltons.dictutils import FrozenDict
 from braket.aws import AwsSession
 from braket.tasks import QuantumTask
 from dimod import SampleSet
+from dwave.cloud.solver import StructuredSolver
 
 from braket.ocean_plugin.braket_sampler import BraketSampler
 from braket.ocean_plugin.braket_solver_metadata import BraketSolverMetadata
@@ -208,6 +209,7 @@ class BraketDWaveSampler(BraketSampler):
             ...
             {30: 1, 31: -1}
         """
+        self.vartype = "ising"
         return super().sample_ising_quantum_task(h, J, **kwargs)
 
     def sample_qubo(self, Q: Dict[Tuple[int, int], float], **kwargs) -> SampleSet:
@@ -298,6 +300,7 @@ class BraketDWaveSampler(BraketSampler):
             {30: 0, 31: 1}
             {30: 1, 31: 0}
         """
+        self.vartype = "qubo"
         return super().sample_qubo_quantum_task(Q, **kwargs)
 
     def _process_solver_kwargs(self, **kwargs) -> Dict[str, Any]:
@@ -311,9 +314,14 @@ class BraketDWaveSampler(BraketSampler):
         """
         self._check_kwargs_solver(**kwargs)
 
+        reformatted_params = StructuredSolver.reformat_parameters(
+            self.vartype, kwargs, self.properties
+        )
         # Translate kwargs from D-Wave format to Braket format
         parameter_dict = BraketSolverMetadata.get_metadata_by_arn(self._device_arn)["parameters"]
-        translated_kwargs = {parameter_dict[key]: kwargs[key] for key in kwargs}
+        translated_kwargs = {
+            parameter_dict[key]: reformatted_params[key] for key in reformatted_params
+        }
         if "resultFormat" in translated_kwargs:
             translated_kwargs["resultFormat"] = translated_kwargs["resultFormat"].upper()
         if "postprocessingType" in translated_kwargs:
