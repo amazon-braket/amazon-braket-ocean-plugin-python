@@ -329,9 +329,6 @@ def sample_ising_common_testing(
     assert actual.info == info
 
 
-# add test for reverse annealing
-
-
 def sample_qubo_quantum_task_common_testing(
     sampler,
     s3_qubo_result,
