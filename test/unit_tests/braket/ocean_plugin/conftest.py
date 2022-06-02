@@ -149,6 +149,16 @@ def active_variables():
     return [4, 5, 6]
 
 
+@pytest.fixture
+def reverse_schedule():
+    return [[0, 1.0], [1, 0.5], [999, 0.5], [1000, 1.0]]
+
+
+@pytest.fixture
+def initial_state_ising_dict():
+    return {0: 1, 1: 1, 2: 1}
+
+
 @pytest.fixture()
 def additional_metadata(active_variables):
     return {
@@ -317,6 +327,9 @@ def sample_ising_common_testing(
     assert actual.vartype == SPIN
     assert actual.record.sample.shape == (3, 3)
     assert actual.info == info
+
+
+# add test for reverse annealing
 
 
 def sample_qubo_quantum_task_common_testing(
