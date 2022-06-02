@@ -50,6 +50,25 @@ def device_parameters_2():
     return {BraketSolverMetadata.DWAVE["device_parameters_key_name"]: {}}
 
 
+@pytest.fixture
+def sample_kwargs_3(shots, reverse_schedule, initial_state_ising_dict):
+    return {
+        "num_reads": shots,
+        "anneal_schedule": reverse_schedule,
+        "initial_state": initial_state_ising_dict,
+    }
+
+
+@pytest.fixture
+def device_parameters_3():
+    return {
+        BraketSolverMetadata.DWAVE["device_parameters_key_name"]: {
+            "annealingSchedule": [[0, 1.0], [1, 0.5], [999, 0.5], [1000, 1.0]],
+            "initialState": [1, 1, 1],
+        }
+    }
+
+
 # Removed s3_destination_folder fixture parameter.
 @pytest.fixture
 @patch("braket.ocean_plugin.braket_sampler.AwsDevice")
@@ -160,6 +179,31 @@ def test_sample_ising_quantum_task_success(
         s3_destination_folder,
         device_parameters_1,
         sample_kwargs_1,
+        shots,
+        logger,
+    )
+
+
+@pytest.mark.parametrize("linear, quadratic", [({0: -1, 1: 1, 2: -1}, {}), ([-1, 1, -1], {})])
+def test_sample_ising_initial_state_dict(
+    linear,
+    quadratic,
+    braket_dwave_sampler,
+    s3_ising_result,
+    s3_destination_folder,
+    device_parameters_3,
+    sample_kwargs_3,
+    shots,
+    logger,
+):
+    sample_ising_quantum_task_common_testing(
+        linear,
+        quadratic,
+        braket_dwave_sampler,
+        s3_ising_result,
+        s3_destination_folder,
+        device_parameters_3,
+        sample_kwargs_3,
         shots,
         logger,
     )

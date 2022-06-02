@@ -23,6 +23,7 @@ from boltons.dictutils import FrozenDict
 from braket.aws import AwsSession
 from braket.tasks import QuantumTask
 from dimod import SampleSet
+from dwave.cloud.solver import StructuredSolver
 
 from braket.ocean_plugin.braket_sampler import BraketSampler
 from braket.ocean_plugin.braket_solver_metadata import BraketSolverMetadata
@@ -152,7 +153,8 @@ class BraketDWaveSampler(BraketSampler):
             ...
             {30: 1, 31: -1}
         """
-        return super().sample_ising(h, J, **kwargs)
+        reformatted_params = StructuredSolver.reformat_parameters("ising", kwargs, self.properties)
+        return super().sample_ising(h, J, **reformatted_params)
 
     def sample_ising_quantum_task(
         self, h: Union[Dict[int, float], List[float]], J: Dict[Tuple[int, int], float], **kwargs
@@ -208,7 +210,8 @@ class BraketDWaveSampler(BraketSampler):
             ...
             {30: 1, 31: -1}
         """
-        return super().sample_ising_quantum_task(h, J, **kwargs)
+        reformatted_params = StructuredSolver.reformat_parameters("ising", kwargs, self.properties)
+        return super().sample_ising_quantum_task(h, J, **reformatted_params)
 
     def sample_qubo(self, Q: Dict[Tuple[int, int], float], **kwargs) -> SampleSet:
         """
@@ -251,7 +254,8 @@ class BraketDWaveSampler(BraketSampler):
             {30: 0, 31: 1}
             {30: 1, 31: 0}
         """
-        return super().sample_qubo(Q, **kwargs)
+        reformatted_params = StructuredSolver.reformat_parameters("qubo", kwargs, self.properties)
+        return super().sample_qubo(Q, **reformatted_params)
 
     def sample_qubo_quantum_task(self, Q: Dict[Tuple[int, int], float], **kwargs) -> QuantumTask:
         """
@@ -298,7 +302,8 @@ class BraketDWaveSampler(BraketSampler):
             {30: 0, 31: 1}
             {30: 1, 31: 0}
         """
-        return super().sample_qubo_quantum_task(Q, **kwargs)
+        reformatted_params = StructuredSolver.reformat_parameters("qubo", kwargs, self.properties)
+        return super().sample_qubo_quantum_task(Q, **reformatted_params)
 
     def _process_solver_kwargs(self, **kwargs) -> Dict[str, Any]:
         """
