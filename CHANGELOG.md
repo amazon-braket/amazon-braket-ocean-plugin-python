@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.10 (2022-06-03)
+
+### Bug Fixes and Other Changes
+
+ * initial state error for reverse annealing
+
 ## v1.0.9 (2022-02-17)
 
 ### Bug Fixes and Other Changes
