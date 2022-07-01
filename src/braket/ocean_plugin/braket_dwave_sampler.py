@@ -16,7 +16,7 @@ from __future__ import annotations
 import copy
 from functools import lru_cache
 from logging import Logger, getLogger
-from typing import Any, Dict, List, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import jsonref
 from boltons.dictutils import FrozenDict
@@ -34,22 +34,22 @@ class BraketDWaveSampler(BraketSampler):
     A class for using DWave-formatted parameters and properties with Amazon Braket as a sampler.
 
     Args:
-        s3_destination_folder (AwsSession.S3DestinationFolder): NamedTuple with bucket (index 0)
-            and key (index 1) that is the results destination folder in S3.
+        s3_destination_folder (AwsSession.S3DestinationFolder, optional): NamedTuple with bucket
+        (index 0) and key (index 1) to save the task's results in S3.
+        Default is `<default_bucket>/tasks`.
         device_arn (str): AWS quantum device arn. Default is the latest D-Wave QPU device ARN.
-        aws_session (AwsSession): AwsSession to call AWS with.
+        aws_session (AwsSession): AwsSession to call AWS with. Default is `None`.
         logger (Logger): Python Logger object with which to write logs, such as `QuantumTask`
             statuses while polling for task to complete. Default is `getLogger(__name__)`
 
     Examples:
         >>> from braket.ocean_plugin import BraketDWaveSampler
-        >>> s3_destination_folder = ('test_bucket', 'test_folder')
-        >>> sampler = BraketDWaveSampler(s3_destination_folder)
+        >>> sampler = BraketDWaveSampler()
     """
 
     def __init__(
         self,
-        s3_destination_folder: AwsSession.S3DestinationFolder = None,
+        s3_destination_folder: Optional[AwsSession.S3DestinationFolder] = None,
         device_arn: str = None,
         aws_session: AwsSession = None,
         logger: Logger = getLogger(__name__),
