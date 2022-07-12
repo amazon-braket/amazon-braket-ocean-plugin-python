@@ -26,7 +26,7 @@ from conftest import (
 )
 from dimod.exceptions import BinaryQuadraticModelStructureError
 
-from braket.ocean_plugin import BraketSampler, BraketSolverMetadata
+from braket.ocean_plugin import BraketSampler, BraketSolverMetadata, __version__
 
 
 @pytest.fixture
@@ -62,6 +62,19 @@ def advantage_braket_sampler(
     mock_qpu.return_value.properties = advantage_braket_sampler_properties
     sampler = BraketSampler(s3_destination_folder, dwave_arn, Mock(), logger)
     return sampler
+
+
+@patch("braket.ocean_plugin.braket_sampler.AwsDevice")
+def test_sampler_add_braket_user_agent_invoked(
+    aws_device_mock, braket_sampler_properties, s3_destination_folder, logger, dwave_arn
+):
+    aws_device_mock_instance = aws_device_mock.return_value
+    aws_device_mock_instance.properties = braket_sampler_properties
+    BraketSampler(s3_destination_folder, dwave_arn, Mock(), logger)
+    expected_user_agent = f"BraketOceanPlugin/{__version__}"
+    aws_device_mock_instance.aws_session.add_braket_user_agent.assert_called_with(
+        expected_user_agent
+    )
 
 
 def test_parameters(braket_sampler):

@@ -30,6 +30,8 @@ from dimod.exceptions import BinaryQuadraticModelStructureError
 
 from braket.ocean_plugin.braket_solver_metadata import BraketSolverMetadata
 
+from ._version import __version__
+
 
 class BraketSampler(Sampler, Structured):
     """
@@ -69,6 +71,8 @@ class BraketSampler(Sampler, Structured):
         self._logger = logger
 
         self.solver = AwsDevice(device_arn, aws_session)
+        user_agent = f"BraketOceanPlugin/{__version__}"
+        self.solver.aws_session.add_braket_user_agent(user_agent)
 
     @property
     @lru_cache(maxsize=1)

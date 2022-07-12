@@ -27,7 +27,7 @@ setup(
     packages=find_namespace_packages(where="src", exclude=("test",)),
     package_dir={"": "src"},
     install_requires=[
-        "amazon-braket-sdk>=1.10.0",
+        "amazon-braket-sdk>=1.25.0",
         "boto3>=1.18.13",
         "boltons>=20.0.0",
         "colorama>=0.4.3",
