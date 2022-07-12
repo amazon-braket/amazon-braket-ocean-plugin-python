@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.11 (2022-07-12)
+
+### Bug Fixes and Other Changes
+
+ * Add user agent for Braket interactions
+
 ## v1.0.10 (2022-06-03)
 
 ### Bug Fixes and Other Changes
