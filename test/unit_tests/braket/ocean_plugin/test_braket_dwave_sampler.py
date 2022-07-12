@@ -22,7 +22,7 @@ from conftest import (
     sample_qubo_quantum_task_common_testing,
 )
 
-from braket.ocean_plugin import BraketDWaveSampler, BraketSampler, BraketSolverMetadata
+from braket.ocean_plugin import BraketDWaveSampler, BraketSampler, BraketSolverMetadata, __version__
 
 
 @pytest.fixture
@@ -79,6 +79,19 @@ def braket_dwave_sampler(
     sampler = BraketDWaveSampler(s3_destination_folder, dwave_arn, Mock(), logger)
     assert isinstance(sampler, BraketSampler)
     return sampler
+
+
+@patch("braket.ocean_plugin.braket_sampler.AwsDevice")
+def test_sampler_add_braket_user_agent_invoked(
+    aws_device_mock, braket_sampler_properties, s3_destination_folder, logger, dwave_arn
+):
+    aws_device_mock_instance = aws_device_mock.return_value
+    aws_device_mock_instance.properties = braket_sampler_properties
+    BraketDWaveSampler(s3_destination_folder, dwave_arn, Mock(), logger)
+    expected_user_agent = f"BraketOceanPlugin/{__version__}"
+    aws_device_mock_instance.aws_session.add_braket_user_agent.assert_called_with(
+        expected_user_agent
+    )
 
 
 @patch("braket.ocean_plugin.braket_sampler.AwsDevice")
