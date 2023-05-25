@@ -1,5 +1,7 @@
 # Amazon Braket Ocean Plugin
 
+:warning: **As of 11/17/2022, D-Wave is no longer available on Amazon Braket and has transitioned to the AWS Marketplace. Therefore, information on this page may be outdated. [Learn more.](https://aws.amazon.com/marketplace/seller-profile?id=aa4f61b5-7b1f-4984-9175-1a636281d694)**
+
 [![Latest Version](https://img.shields.io/pypi/v/amazon-braket-ocean-plugin.svg)](https://pypi.python.org/pypi/amazon-braket-ocean-plugin)
 [![Supported Python Versions](https://img.shields.io/pypi/pyversions/amazon-braket-ocean-plugin.svg)](https://pypi.python.org/pypi/amazon-braket-ocean-plugin)
 [![Build Status](https://img.shields.io/github/workflow/status/aws/amazon-braket-ocean-plugin-python/Python%20package/main?logo=github)](https://github.com/aws/amazon-braket-ocean-plugin-python/actions?query=workflow%3A%22Python+package%22)
